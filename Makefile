@@ -138,15 +138,14 @@ _build-images:
 		$(call NotSupported,$(PRODUCT),$(TARGET)))
 
 .prepare:
-	(cd $(OPENWRT_DIR)/package && ln -fs ../../package/*/ .)
-	(cd patches && \
+	-(cd $(OPENWRT_DIR)/package && ln -fs ../../package/*/ .)
+	-(cd patches && \
 	 find package feeds -name '*.patch' \
-	   -printf 'mkdir -p ../$(OPENWRT_DIR)/%h/patches && 
-	            cp %p ../$(OPENWRT_DIR)/%h/patches/%f\n' | sh)
-	#for f in patches/openwrt/*; do \
-	#    (cd $(OPENWRT_DIR) && ls ../$$f); \
-	#    (cd $(OPENWRT_DIR) && patch -N -p0 < ../$$f); \
-	#done
+	   -printf 'mkdir -p ../$(OPENWRT_DIR)/%h/patches && cp %p ../$(OPENWRT_DIR)/%h/patches/%f\n' | sh)
+	-for f in patches/openwrt/*; do \
+	    (cd $(OPENWRT_DIR) && ls ../$$f); \
+	    (cd $(OPENWRT_DIR) && patch -N -p0 < ../$$f); \
+	done
 	touch $@
 
 $(OPENWRT_DIR):
