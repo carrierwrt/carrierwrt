@@ -35,7 +35,8 @@ How to get started
 ==================
 
 You need to have installed git, svn, gcc, binutils, patch, bzip2, flex, make,
-gettext, pkg-config, unzip, libz-dev and libc headers. Then:
+gettext, pkg-config, unzip, libz-dev, libncurses-dev, gawk and libc headers.
+Then:
 
 1. git clone https://github.com/carrierwrt/carrierwrt.git
 
