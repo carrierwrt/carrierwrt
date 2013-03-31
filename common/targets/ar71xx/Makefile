@@ -16,5 +16,3 @@ define Target/ar71xx
     ar71xx/openwrt-ar71xx-generic-tl-wr941nd-v2-squashfs-sysupgrade.bin
 
 endef
-
-ALL_TARGETS += ar71xx
