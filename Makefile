@@ -4,21 +4,23 @@
 
 include config.mk
 
-include products/rgw.mk
-
-include targets/ar71xx.mk
+# Products
+PRODUCTS=$(notdir $(wildcard products/*))
+$(foreach product, $(PRODUCTS), $(eval include products/$(product)/Makefile))
 
 # ======================================================================
 #  Internal variables
 # ======================================================================
 
 V ?= 0
+J ?= 3
 
-OPENWRT_BASE := svn://svn.openwrt.org/openwrt
-OPENWRT_DIR  := openwrt
-OPENWRT_URL  := $(OPENWRT_BASE)/$(CONFIG_OPENWRT_REV)
-LUCI_BASE    := http://svn.luci.subsignal.org/luci
-LUCI_URL     := $(LUCI_BASE)/$(CONFIG_LUCI_REV)
+OPENWRT_BASE 	:= svn://svn.openwrt.org/openwrt
+OPENWRT_DIR  	:= openwrt
+OPENWRT_URL  	:= $(OPENWRT_BASE)/$(CONFIG_OPENWRT_PATH)@$(CONFIG_OPENWRT_REV)
+LUCI_BASE    	:= http://svn.luci.subsignal.org/luci
+LUCI_URL     	:= $(LUCI_BASE)/$(CONFIG_LUCI_PATH)/contrib/package@$(CONFIG_LUCI_REV)
+LUCI_FEEDS_DIR	:= $(OPENWRT_DIR)/feeds/luci/luci
 
 # WriteConfig <line>
 define WriteConfig
@@ -33,35 +35,36 @@ define Configure
 	$(MAKE) -C $(OPENWRT_DIR) defconfig > /dev/null
 endef
 
-# CleanImage <target> <image>
+# CleanImage <image>
 define CleanImage
-	rm -f $(OPENWRT_DIR)/bin/$(3)
-	rm -f firmware/$(1)/$(2)/$(notdir $(3))*
+	rm -f $(OPENWRT_DIR)/bin/$(1)
+	rm -f firmware/$(PRODUCT)/$(TARGET)/$(CUSTOMIZATION)/$(notdir $(1))*
 endef
 
-# Clean <product> <target> <images>
+# Clean <images>
 define Clean
-	$(foreach image,$(3),$(call CleanImage,$(1),$(2),$(image)) &&) true
+	$(foreach image,$(1),$(call CleanImage,$(image)) &&) true
 endef
 
-# Build <product> <target> <images> <config>
+# Build <images> <config>
 define Build
-	$(call Configure,$(4))
-	$(call Clean,$(1),$(2),$(3))
-	make -j -C $(OPENWRT_DIR) V=$(V)
-	$(call Install,$(1),$(2),$(3))
+	$(call Configure,$(2))
+	$(call Clean,$(1))
+	make -j $J -C $(OPENWRT_DIR) V=$(V)
+	$(call Install,$(1))
 endef
 
-# InstallImage <target> <image>
+# InstallImage <image>
 define InstallImage
-	cp $(OPENWRT_DIR)/bin/$(3) firmware/$(1)/$(2)/$(notdir $(3))
-	md5sum firmware/$(1)/$(2)/$(notdir $(3)) > firmware/$(1)/$(2)/$(notdir $(3)).md5
+	cp $(OPENWRT_DIR)/bin/$(1) firmware/$(PRODUCT)/$(TARGET)/$(CUSTOMIZATION)/$(notdir $(1))
+	md5sum firmware/$(PRODUCT)/$(TARGET)/$(CUSTOMIZATION)/$(notdir $(1)) \
+		> firmware/$(PRODUCT)/$(TARGET)/$(CUSTOMIZATION)/$(notdir $(1)).md5
 endef
 
-# Install <product> <target> <images>
+# Install <images>
 define Install
-	mkdir -p firmware/$(1)/$(2)
-	$(foreach image,$(3),$(call InstallImage,$(1),$(2),$(image)) &&) true
+	mkdir -p firmware/$(PRODUCT)/$(TARGET)/$(CUSTOMIZATION)
+	$(foreach image,$(1),$(call InstallImage,$(image)) &&) true
 endef
 
 # NotSupported <product> <target>
@@ -84,12 +87,14 @@ all: $(OPENWRT_DIR) $(OPENWRT_DIR)/feeds.conf
 help:
 	@echo "============================================================="
 	@echo "VARIABLES:"
-	@echo "    PRODUCT   Product product (unset to build all)"
-	@echo "    TARGET    Target platform name (unset to build all)"
+	@echo "    PRODUCT        Product profile (unset to build all)"
+	@echo "    TARGET         Target platform (unset to build all)"
+	@echo "    CUSTOMIZATION  Product variant (unset to build all)"
 	@echo ""
 	@echo "FILES:"
 	@echo "    config.mk       Common configuration options"
-	@echo "    products/*.mk   Product product configurations"
+	@echo "    targets/*       Target platform configurations"
+	@echo "    products/*      Product profile configurations"
 	@echo ""
 	@echo "EXAMPLES:"
 	@echo "    make"
@@ -115,37 +120,83 @@ _touch:
 ifeq ($(PRODUCT),)
 _build: _build-products
 else
+
+# Load all targets:
+TARGETS=$(notdir $(wildcard products/$(PRODUCT)/targets/*))
+$(foreach target, $(TARGETS), \
+	$(eval include products/$(PRODUCT)/targets/$(target)/Makefile))
+
+# Load all customizations:
+CUSTOMIZATIONS=$(notdir $(wildcard products/$(PRODUCT)/customizations/*))
+$(foreach customization, $(CUSTOMIZATIONS), \
+	$(eval include products/$(PRODUCT)/customizations/$(customization)/Makefile))
+
 ifeq ($(TARGET),)
 _build: _build-targets
 else
+ifeq ($(CUSTOMIZATION),)
+_build: _build-customizations
+else 
 _build: _build-images
 endif
 endif
+endif
+
 
 _build-products:
-	$(foreach product,$(ALL_PRODUCTS),\
+	$(foreach product,$(PRODUCTS),\
 	   $(MAKE) _build-targets PRODUCT=$(product) &&) true
 
 _build-targets:
-	$(foreach target,$(ALL_TARGETS),\
-	   $(MAKE) _build-images TARGET=$(target) &&) true
+	$(foreach target,$(TARGETS),\
+	   $(MAKE) _build-customizations TARGET=$(target) &&) true
+
+_build-customizations:
+	$(MAKE) _build-images
+	$(foreach customization,$(CUSTOMIZATIONS),\
+	   $(MAKE) _build-images CUSTOMIZATION=$(customization) &&) true
 
 _build-images:
-	$(eval $(call Target/$(TARGET)))
 	$(eval $(call Product/$(PRODUCT)))
-	$(if $(findstring $(TARGET),$(SUPPORTED_TARGETS)),\
-		$(call Build,$(PRODUCT),$(TARGET),$(IMAGES),$(CONFIG)),\
+	$(eval $(call Target/$(TARGET)))
+ifneq ($(CUSTOMIZATION),)
+	$(eval $(call Customization/$(CUSTOMIZATION)))
+else
+	$(eval $(call Customization/default))
+endif
+
+	# Lock LuCI to specific revision
+	sed -i 's/^PKG_BRANCH\:=.*/PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)/' \
+               $(LUCI_FEEDS_DIR)/Makefile
+	
+	# Clear/prepare openwrt/files directory
+	test -d $(OPENWRT_DIR)/files && rm -rf $(OPENWRT_DIR)/files/* || mkdir $(OPENWRT_DIR)/files
+
+	# Apply product changes
+	-cp -r products/$(PRODUCT)/files/* $(OPENWRT_DIR)/files/
+
+	# Apply target changes
+	-cp -r products/$(PRODUCT)/targets/$(TARGET)/files/* $(OPENWRT_DIR)/files/
+
+ifneq ($(CUSTOMIZATION),)
+	# Apply customizations
+	-cp -r products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/files/* $(OPENWRT_DIR)/files/
+endif
+	
+	# Build
+	$(if $(findstring $(TARGET),$(TARGETS)),\
+		$(call Build,$(IMAGES),$(CONFIG)),\
 		$(call NotSupported,$(PRODUCT),$(TARGET)))
 
 .prepare:
-	-(cd $(OPENWRT_DIR)/package && ln -fs ../../package/*/ .)
-	-(cd patches && \
-	 find package feeds -name '*.patch' \
-	   -printf 'mkdir -p ../$(OPENWRT_DIR)/%h/patches && cp %p ../$(OPENWRT_DIR)/%h/patches/%f\n' | sh)
-	-for f in patches/openwrt/*; do \
-	    (cd $(OPENWRT_DIR) && ls ../$$f); \
-	    (cd $(OPENWRT_DIR) && patch -N -p0 < ../$$f); \
-	done
+	#(cd $(OPENWRT_DIR)/package && ln -fs ../../package/*/ .)
+	#(cd patches && \
+	# find package feeds -name '*.patch' \
+	#   -printf 'mkdir -p ../$(OPENWRT_DIR)/%h/patches && cp %p ../$(OPENWRT_DIR)/%h/patches/%f\n' | sh)
+	#for f in patches/openwrt/*; do \
+	#    (cd $(OPENWRT_DIR) && ls ../$$f); \
+	#    (cd $(OPENWRT_DIR) && patch -N -p0 < ../$$f); \
+	#done
 	touch $@
 
 $(OPENWRT_DIR):

@@ -7,10 +7,12 @@
 
 define Product/rgw
 
-  CONFIG += 
-
-  SUPPORTED_TARGETS = ar71xx
+	CONFIG += CONFIG_PACKAGE_luci=y
 
 endef
 
-ALL_PRODUCTS += rgw
+define Customization/default
+
+	CONFIG += 
+
+endef
