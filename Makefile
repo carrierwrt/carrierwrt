@@ -22,6 +22,11 @@ LUCI_BASE    	:= http://svn.luci.subsignal.org/luci
 LUCI_URL     	:= $(LUCI_BASE)/$(CONFIG_LUCI_PATH)/contrib/package@$(CONFIG_LUCI_REV)
 LUCI_FEEDS_DIR	:= $(OPENWRT_DIR)/feeds/luci/luci
 
+# Reset variables
+define ResetVariables
+	SETTINGS =
+endef
+
 # WriteConfig <line>
 define WriteConfig
 	echo $(1) >> $(OPENWRT_DIR)/.config
@@ -92,9 +97,9 @@ help:
 	@echo "    CUSTOMIZATION  Product variant (unset to build all)"
 	@echo ""
 	@echo "FILES:"
-	@echo "    config.mk       Common configuration options"
-	@echo "    targets/*       Target platform configurations"
-	@echo "    products/*      Product profile configurations"
+	@echo "    config.mk        Common configuration options"
+	@echo "    common/targets/* Target platform configurations"
+	@echo "    products/*       Product profile configurations"
 	@echo ""
 	@echo "EXAMPLES:"
 	@echo "    make"
@@ -157,21 +162,43 @@ _build-customizations:
 	   $(MAKE) _build-images CUSTOMIZATION=$(customization) &&) true
 
 _build-images:
+
+	# Clear/prepare openwrt/files directory
+	test -d $(OPENWRT_DIR)/files/etc/uci-defaults && rm -rf $(OPENWRT_DIR)/files/etc/uci-defaults/* || mkdir -p $(OPENWRT_DIR)/files/etc/uci-defaults
+
+	# Load Product
+	$(eval $(call ResetVariables))
 	$(eval $(call Product/$(PRODUCT)))
+	if [ -n "$(SETTINGS)" ]; then \
+		cp products/$(PRODUCT)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z01-product || break; \
+	fi
+
+	# Load Target
+	$(eval $(call ResetVariables))
 	$(eval $(call Target/$(TARGET)))
+	if [ -n "$(SETTINGS)" ]; then \
+		cp common/targets/$(TARGET)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z02-target || break; \
+	fi
+
+	# Load Customization
+	$(eval $(call ResetVariables))
 ifneq ($(CUSTOMIZATION),)
 	$(eval $(call Customization/$(CUSTOMIZATION)))
+	if [ -n "$(SETTINGS)" ]; then \
+		cp products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z03-customization || break; \
+	fi
 else
 	$(eval $(call Customization/default))
+	if [ -n "$(SETTINGS)" ]; then \
+		cp products/$(PRODUCT)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z03-customization || break; \
+	fi
 endif
+
 
 	# Lock LuCI to specific revision
 	sed -i 's/^PKG_BRANCH\:=.*/PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)/' \
                $(LUCI_FEEDS_DIR)/Makefile
 	
-	# Clear/prepare openwrt/files directory
-	test -d $(OPENWRT_DIR)/files && rm -rf $(OPENWRT_DIR)/files/* || mkdir $(OPENWRT_DIR)/files
-
 	# Apply product changes
 	-cp -r products/$(PRODUCT)/files/* $(OPENWRT_DIR)/files/
 

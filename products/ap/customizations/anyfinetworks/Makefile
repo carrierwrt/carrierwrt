@@ -10,4 +10,6 @@ define Customization/anyfinetworks
 
   CONFIG += 
 
+  SETTINGS = uci-defaults.sh
+
 endef
