@@ -4,16 +4,11 @@
 
 include config.mk
 
-# Products
-PRODUCTS=$(notdir $(wildcard products/*))
-$(foreach product, $(PRODUCTS), $(eval include products/$(product)/Makefile))
-
 # ======================================================================
 #  Internal variables
 # ======================================================================
 
 V ?= 0
-J ?= 3
 
 OPENWRT_BASE 	:= svn://svn.openwrt.org/openwrt
 OPENWRT_DIR  	:= openwrt
@@ -37,7 +32,7 @@ endef
 define Configure
 	rm -f $(OPENWRT_DIR)/.config
 	$(foreach line,$(1),$(call WriteConfig,$(line)) &&) true
-	$(MAKE) -C $(OPENWRT_DIR) defconfig > /dev/null
+	$(MAKE) MAKEOVERRIDES='' -C $(OPENWRT_DIR) defconfig > /dev/null
 endef
 
 # CleanImage <image>
@@ -55,7 +50,7 @@ endef
 define Build
 	$(call Configure,$(2))
 	$(call Clean,$(1))
-	make -j $J -C $(OPENWRT_DIR) V=$(V)
+	$(MAKE) MAKEOVERRIDES='' -C $(OPENWRT_DIR) V=$(V)
 	$(call Install,$(1))
 endef
 
@@ -70,13 +65,6 @@ endef
 define Install
 	mkdir -p firmware/$(PRODUCT)/$(TARGET)/$(CUSTOMIZATION)
 	$(foreach image,$(1),$(call InstallImage,$(image)) &&) true
-endef
-
-# NotSupported <product> <target>
-define NotSupported
-	@echo "============================================================="
-	@echo "SORRY, PRODUCT PROFILE $(1) CANNOT BE BUILT FOR TARGET $(2)."
-	@echo "============================================================="
 endef
 
 # ======================================================================
@@ -112,9 +100,17 @@ help:
 
 _info:
 	@echo "==============================================================="
+	@if [ -z "$(PRODUCT)" ]; \
+	    then echo " PRODUCTS:       $(PRODUCTS)"; \
+	    else echo " PRODUCT:        $(PRODUCT)"; \
+	fi
 	@if [ -z "$(TARGET)" ]; \
-	    then echo " TARGET:  (all)"; \
-	    else echo " TARGET:  $(TARGET)"; \
+	    then echo " TARGET:         (all)"; \
+	    else echo " TARGET:         $(TARGET)"; \
+	fi
+	@if [ -z "$(CUSTOMIZATION)" ]; \
+	    then echo " CUSTOMIZATION:  (all)"; \
+	    else echo " CUSTOMIZATION:  $(CUSTOMIZATION)"; \
 	fi
 	@echo " Firmware images are in $(PWD)/firmware/"
 	@echo "==============================================================="
@@ -122,26 +118,24 @@ _info:
 _touch:
 	#touch -f package/*/Makefile
 
+PRODUCTS=$(notdir $(wildcard products/*))
 ifeq ($(PRODUCT),)
 _build: _build-products
 else
+include products/$(PRODUCT)/Makefile
 
-# Load all targets:
 TARGETS=$(notdir $(wildcard products/$(PRODUCT)/targets/*))
-$(foreach target, $(TARGETS), \
-	$(eval include products/$(PRODUCT)/targets/$(target)/Makefile))
-
-# Load all customizations:
-CUSTOMIZATIONS=$(notdir $(wildcard products/$(PRODUCT)/customizations/*))
-$(foreach customization, $(CUSTOMIZATIONS), \
-	$(eval include products/$(PRODUCT)/customizations/$(customization)/Makefile))
-
 ifeq ($(TARGET),)
 _build: _build-targets
 else
+include products/$(PRODUCT)/targets/$(TARGET)/Makefile
+
+CUSTOMIZATIONS=$(notdir $(wildcard products/$(PRODUCT)/customizations/*))
 ifeq ($(CUSTOMIZATION),)
 _build: _build-customizations
 else 
+include products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/Makefile
+
 _build: _build-images
 endif
 endif
@@ -164,31 +158,34 @@ _build-customizations:
 _build-images:
 
 	# Clear/prepare openwrt/files directory
-	test -d $(OPENWRT_DIR)/files/etc/uci-defaults && rm -rf $(OPENWRT_DIR)/files/etc/uci-defaults/* || mkdir -p $(OPENWRT_DIR)/files/etc/uci-defaults
+	test -d $(OPENWRT_DIR)/files/etc/uci-defaults && \
+		rm -rf $(OPENWRT_DIR)/files/etc/uci-defaults/* || \
+		mkdir -p $(OPENWRT_DIR)/files/etc/uci-defaults
 
 	# Load Product
-	$(eval $(call ResetVariables))
-	$(eval $(call Product/$(PRODUCT)))
+	$(eval $(ResetVariables))
+	$(eval $(Product/$(PRODUCT)))
 	if [ -n "$(SETTINGS)" ]; then \
 		cp products/$(PRODUCT)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z01-product || break; \
 	fi
 
 	# Load Target
-	$(eval $(call ResetVariables))
-	$(eval $(call Target/$(TARGET)))
+	$(eval $(ResetVariables))
+	$(eval $(Target/$(TARGET)))
 	if [ -n "$(SETTINGS)" ]; then \
 		cp common/targets/$(TARGET)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z02-target || break; \
 	fi
 
 	# Load Customization
-	$(eval $(call ResetVariables))
+	$(eval $(ResetVariables))
 ifneq ($(CUSTOMIZATION),)
-	$(eval $(call Customization/$(CUSTOMIZATION)))
+	$(eval $(Customization/$(CUSTOMIZATION)))
 	if [ -n "$(SETTINGS)" ]; then \
-		cp products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z03-customization || break; \
+		cp products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/$(SETTINGS) \
+			$(OPENWRT_DIR)/files/etc/uci-defaults/z03-customization || break; \
 	fi
 else
-	$(eval $(call Customization/default))
+	$(eval $(Customization/default))
 	if [ -n "$(SETTINGS)" ]; then \
 		cp products/$(PRODUCT)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z03-customization || break; \
 	fi
@@ -211,9 +208,7 @@ ifneq ($(CUSTOMIZATION),)
 endif
 	
 	# Build
-	$(if $(findstring $(TARGET),$(TARGETS)),\
-		$(call Build,$(IMAGES),$(CONFIG)),\
-		$(call NotSupported,$(PRODUCT),$(TARGET)))
+	$(call Build,$(IMAGES),$(CONFIG))
 
 .prepare:
 	#(cd $(OPENWRT_DIR)/package && ln -fs ../../package/*/ .)
