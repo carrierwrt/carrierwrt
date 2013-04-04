@@ -21,4 +21,7 @@ define Customization/default
 
   SETTINGS = uci-defaults.sh
 
+  # Don't build for TL since they are impossible to flash without webui/telnet/ssh
+  IMAGES := $(filter-out ar71xx/openwrt-ar71xx-generic-tl-%, $(IMAGES))
+
 endef
