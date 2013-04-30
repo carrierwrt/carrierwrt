@@ -17,7 +17,9 @@ endef
 
 define Customization/default
 
-  CONFIG += CONFIG_PACKAGE_luci=y
+  CONFIG += \
+  		CONFIG_PACKAGE_luci=y \
+  		CONFIG_PACKAGE_luci-theme-bootstrap=y
 
   SETTINGS = uci-defaults.sh
 

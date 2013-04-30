@@ -9,4 +9,9 @@ uci set wireless.@wifi-iface[0].encryption=psk2
 uci set wireless.@wifi-iface[0].key="$(echo $MAC | sed 's/://g')"
 uci commit wireless
 
+# Set bootstrap as theme in luci
+uci set luci.main.mediaurlbase=/luci-static/bootstrap
+uci commit luci
+
+
 exit 0

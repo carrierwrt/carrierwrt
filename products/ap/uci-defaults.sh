@@ -15,4 +15,8 @@ uci set firewall.@rule[-1].proto=tcp
 uci set firewall.@rule[-1].dest_port=80
 uci commit firewall
 
+# Set bootstrap as theme in luci
+uci set luci.main.mediaurlbase=/luci-static/bootstrap
+uci commit luci
+
 exit 0
