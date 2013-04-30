@@ -5,7 +5,7 @@ uci set network.lan.ipaddr=192.168.8.1
 uci commit network
 
 # Set product as hostname
-uci set system.@system[0].hostname=carrier-ap
+uci set system.@system[0].hostname=carrier-rgw
 uci commit system
 echo $(uci get system.@system[0].hostname) > /proc/sys/kernel/hostname
 
