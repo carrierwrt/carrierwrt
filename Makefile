@@ -15,7 +15,8 @@ OPENWRT_DIR  	:= openwrt
 OPENWRT_URL  	:= $(OPENWRT_BASE)/$(CONFIG_OPENWRT_PATH)@$(CONFIG_OPENWRT_REV)
 LUCI_BASE    	:= http://svn.luci.subsignal.org/luci
 LUCI_URL     	:= $(LUCI_BASE)/$(CONFIG_LUCI_PATH)/contrib/package@$(CONFIG_LUCI_REV)
-LUCI_FEEDS_DIR	:= $(OPENWRT_DIR)/feeds/luci/luci
+LUCI_FEEDS_DIR  := $(OPENWRT_DIR)/feeds/luci
+PACKAGES        := $(wildcard package/*)
 
 # Reset variables
 define ResetVariables
@@ -46,6 +47,34 @@ define Clean
 	$(foreach image,$(1),$(call CleanImage,$(image)) &&) true
 endef
 
+# PatchOne <patchdir>
+define PatchOne
+	if [ -d $(1)/openwrt ]; then \
+		for f in $(1)/openwrt/*; do \
+			(cd $(OPENWRT_DIR) && patch -p0 < ../$$f); \
+		done; \
+	fi
+	if [ -d $(1)/package ]; then \
+		(cd $(1) && \
+		 find package -name '*.patch' \
+			 -printf 'mkdir -p $(OPENWRT_DIR)/%h/patches && \
+								cp $(1)/%p $(OPENWRT_DIR)/%h/patches/%f\n') | sh; \
+	fi
+	if [ -d $(1)/feeds ]; then \
+		(cd $(1) && \
+		 find feeds -name '*.patch' \
+			 -printf 'mkdir -p $(OPENWRT_DIR)/%h/patches && \
+								cp $(1)/%p $(OPENWRT_DIR)/%h/patches/%f\n') | sh; \
+	fi
+endef
+
+# Patch <config> <dir>
+define Patch
+	$(foreach package,$(notdir $(wildcard $(2)/*)),\
+		$(if $(findstring CONFIG_PACKAGE_$(package)=y,$(1)),\
+			$(call PatchOne,$(2)/$(package))))
+endef
+
 # Build <images> <config>
 define Build
 	$(call Configure,$(2))
@@ -72,7 +101,6 @@ endef
 # ======================================================================
 
 all: $(OPENWRT_DIR) $(OPENWRT_DIR)/feeds.conf
-	$(MAKE) .prepare
 	$(MAKE) _touch
 	$(MAKE) _build
 	$(MAKE) _info
@@ -116,7 +144,7 @@ _info:
 	@echo "==============================================================="
 
 _touch:
-	#touch -f package/*/Makefile
+	$(foreach package,$(PACKAGES),$(shell touch $(package)/Makefile))
 
 PRODUCTS=$(notdir $(wildcard products/*))
 ifeq ($(PRODUCT),)
@@ -157,10 +185,12 @@ _build-customizations:
 
 _build-images:
 
-	# Clear/prepare openwrt/files directory
-	test -d $(OPENWRT_DIR)/files/etc/uci-defaults && \
-		rm -rf $(OPENWRT_DIR)/files/etc/uci-defaults/* || \
-		mkdir -p $(OPENWRT_DIR)/files/etc/uci-defaults
+	# Revert openwrt and luci to pristine condition
+	scripts/svn-pristine $(OPENWRT_DIR) | sh
+	scripts/svn-pristine $(LUCI_FEEDS_DIR) | sh
+
+	$(foreach package,$(PACKAGES),ln -fs ../../$(package) $(OPENWRT_DIR)/$(package))
+	mkdir -p $(OPENWRT_DIR)/files/etc/uci-defaults
 
 	# Load Product
 	$(eval $(ResetVariables))
@@ -193,8 +223,8 @@ endif
 
 
 	# Lock LuCI to specific revision
-	sed -i 's/^PKG_BRANCH\:=.*/PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)/' \
-               $(LUCI_FEEDS_DIR)/Makefile
+	sed -i 's|^PKG_BRANCH\:=.*|PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)|' \
+               $(LUCI_FEEDS_DIR)/luci/Makefile
 	
 	# Apply product changes
 	-cp -r products/$(PRODUCT)/files/* $(OPENWRT_DIR)/files/
@@ -206,20 +236,24 @@ ifneq ($(CUSTOMIZATION),)
 	# Apply customizations
 	-cp -r products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/files/* $(OPENWRT_DIR)/files/
 endif
+
+	# Apply base patches
+	$(call Patch,$(CONFIG),patches)
+
+	# Apply product patches
+	$(call Patch,$(CONFIG),products/$(PRODUCT)/patches)
+
+	# Apply target patches
+	$(call Patch, $(CONFIG),common/targets/$(TARGET)/patches)
+
+ifneq ($(CUSTOMIZATION),)
+	# Apply customization patches
+	$(call Patch,$(CONFIG),products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/patches)
+endif
 	
 	# Build
 	$(call Build,$(IMAGES),$(CONFIG))
 
-.prepare:
-	#(cd $(OPENWRT_DIR)/package && ln -fs ../../package/*/ .)
-	#(cd patches && \
-	# find package feeds -name '*.patch' \
-	#   -printf 'mkdir -p ../$(OPENWRT_DIR)/%h/patches && cp %p ../$(OPENWRT_DIR)/%h/patches/%f\n' | sh)
-	#for f in patches/openwrt/*; do \
-	#    (cd $(OPENWRT_DIR) && ls ../$$f); \
-	#    (cd $(OPENWRT_DIR) && patch -N -p0 < ../$$f); \
-	#done
-	touch $@
 
 $(OPENWRT_DIR):
 	svn co $(OPENWRT_URL) $@

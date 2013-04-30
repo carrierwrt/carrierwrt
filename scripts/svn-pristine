@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+
+if [ $# -lt 1 ]
+then
+	echo "Generates a script to restore an SVN repository to pristine condition,"
+	echo "optionally saving a backup copy of any changes made."
+	echo ""
+	echo "Usage: $(basename $0) svn-repository [backup-dir]"
+	echo ""
+
+	exit 1
+fi
+
+REPOSITORY=$1
+BACKUP=$2
+
+svn status $REPOSITORY | while read l
+do
+	S=$(echo $l | cut -d' ' -f1)
+	P=$(echo $l | cut -d' ' -f2)
+
+	case "$S" in
+	"?")
+		if [ -d "$BACKUP" ]
+		then
+			mkdir -p $BACKUP/$(dirname $P)
+			cp -r $P $BACKUP/$P
+		fi
+		echo "rm -rf $P"
+	;;
+	"M")
+		if [ -d "$BACKUP" ]
+		then
+			mkdir -p $BACKUP/$(dirname $P)
+			cp -r $P $BACKUP/$P
+		fi
+		echo "svn revert $P"
+		;;
+	*)
+		echo "WARNING: $(basename $0) does not know what to do with $S!" 1>&2
+		;;
+	esac
+done
+
+exit 0
