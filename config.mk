@@ -1,8 +1,8 @@
 
 # OpenWrt SVN revision/branch/tag
-CONFIG_OPENWRT_PATH = branches/attitude_adjustment
-CONFIG_OPENWRT_REV = 35891
+CONFIG_OPENWRT_PATH = tags/attitude_adjustment_12.09
+CONFIG_OPENWRT_REV = 36422
 
 # LuCI SVN revision/branch/tag
-CONFIG_LUCI_PATH = trunk
-CONFIG_LUCI_REV = 8525
+CONFIG_LUCI_PATH = branches/luci-0.11
+CONFIG_LUCI_REV = 9672
