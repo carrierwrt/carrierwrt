@@ -39,12 +39,15 @@ endef
 # CleanImage <image>
 define CleanImage
 	rm -f $(OPENWRT_DIR)/bin/$(1)
-	rm -f firmware/$(PRODUCT)/$(TARGET)/$(CUSTOMIZATION)/$(notdir $(1))*
+	rm -f firmware/$(PRODUCT)/$(CUSTOMIZATION)/$(notdir $(1))*
+	rm -f firmware/$(PRODUCT)/$(CUSTOMIZATION)/untested/$(notdir $(1))*
 endef
 
 # Clean <images>
 define Clean
-	$(foreach image,$(1),$(call CleanImage,$(image)) &&) true
+	$(foreach image,$(1), \
+		$(call CleanImage,$(image))
+	)
 endef
 
 # PatchOne <patchdir>
@@ -72,28 +75,32 @@ endef
 define Patch
 	$(foreach package,$(notdir $(wildcard $(2)/*)),\
 		$(if $(findstring CONFIG_PACKAGE_$(package)=y,$(1)),\
-			$(call PatchOne,$(2)/$(package))))
+			$(call PatchOne,$(2)/$(package)))
+	)
 endef
 
-# Build <images> <config>
+# Build <config>
 define Build
-	$(call Configure,$(2))
-	$(call Clean,$(1))
+	$(call Configure,$(1))
 	$(MAKE) MAKEOVERRIDES='' -C $(OPENWRT_DIR) V=$(V)
-	$(call Install,$(1))
 endef
 
-# InstallImage <image>
+# InstallImage <src> <dst>
 define InstallImage
-	cp $(OPENWRT_DIR)/bin/$(1) firmware/$(PRODUCT)/$(TARGET)/$(CUSTOMIZATION)/$(notdir $(1))
-	md5sum firmware/$(PRODUCT)/$(TARGET)/$(CUSTOMIZATION)/$(notdir $(1)) \
-		> firmware/$(PRODUCT)/$(TARGET)/$(CUSTOMIZATION)/$(notdir $(1)).md5
+	cp $(1) $(2)
+	md5sum $(2) > $(2).md5
 endef
 
-# Install <images>
+# Install <images> <tested>
 define Install
-	mkdir -p firmware/$(PRODUCT)/$(TARGET)/$(CUSTOMIZATION)
-	$(foreach image,$(1),$(call InstallImage,$(image)) &&) true
+	mkdir -p firmware/$(PRODUCT)/$(CUSTOMIZATION)
+	mkdir -p firmware/$(PRODUCT)/$(CUSTOMIZATION)/untested
+	$(foreach image,$(1), \
+		$(call InstallImage, \
+			$(OPENWRT_DIR)/bin/$(image), \
+			firmware/$(PRODUCT)/$(CUSTOMIZATION)/$(if \
+				$(findstring $(image),$(2)),$(notdir $(image)),untested/$(notdir $(image))))
+	) 
 endef
 
 # ======================================================================
@@ -172,16 +179,16 @@ endif
 
 _build-products:
 	$(foreach product,$(PRODUCTS),\
-	   $(MAKE) _build-targets PRODUCT=$(product) &&) true
+	  $(MAKE) _build-targets PRODUCT=$(product) &&) true
 
 _build-targets:
 	$(foreach target,$(TARGETS),\
-	   $(MAKE) _build-customizations TARGET=$(target) &&) true
+	  $(MAKE) _build-customizations TARGET=$(target) &&) true
 
 _build-customizations:
 	$(MAKE) _build-images
 	$(foreach customization,$(CUSTOMIZATIONS),\
-	   $(MAKE) _build-images CUSTOMIZATION=$(customization) &&) true
+	  $(MAKE) _build-images CUSTOMIZATION=$(customization) &&) true
 
 _build-images:
 
@@ -189,7 +196,7 @@ _build-images:
 	scripts/svn-pristine $(OPENWRT_DIR) | sh
 	scripts/svn-pristine $(LUCI_FEEDS_DIR) | sh
 
-	$(foreach package,$(PACKAGES),ln -fs ../../$(package) $(OPENWRT_DIR)/$(package))
+	true && $(foreach package,$(PACKAGES), ln -fs ../../$(package) $(OPENWRT_DIR)/$(package) &&) true
 	mkdir -p $(OPENWRT_DIR)/files/etc/uci-defaults
 
 	# Load Product
@@ -224,7 +231,7 @@ endif
 
 	# Lock LuCI to specific revision
 	sed -i 's|^PKG_BRANCH\:=.*|PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)|' \
-               $(LUCI_FEEDS_DIR)/luci/Makefile
+			$(LUCI_FEEDS_DIR)/luci/Makefile
 	
 	# Apply product changes
 	-cp -r products/$(PRODUCT)/files/* $(OPENWRT_DIR)/files/
@@ -244,16 +251,21 @@ endif
 	$(call Patch,$(CONFIG),products/$(PRODUCT)/patches)
 
 	# Apply target patches
-	$(call Patch, $(CONFIG),common/targets/$(TARGET)/patches)
+	$(call Patch,$(CONFIG),common/targets/$(TARGET)/patches)
 
 ifneq ($(CUSTOMIZATION),)
 	# Apply customization patches
 	$(call Patch,$(CONFIG),products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/patches)
 endif
+
+	# Clean old images
+	$(call Clean,$(IMAGES))
 	
 	# Build
-	$(call Build,$(IMAGES),$(CONFIG))
+	$(call Build,$(CONFIG))
 
+	# Install
+	$(call Install,$(IMAGES),$(TESTED))
 
 $(OPENWRT_DIR):
 	svn co $(OPENWRT_URL) $@

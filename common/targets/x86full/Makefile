@@ -12,7 +12,8 @@ define Target/x86full
     CONFIG_TARGET_ROOTFS_CPIOGZ=y \
     CONFIG_TARGET_ROOTFS_JFFS2=n
 
-  IMAGES = x86/openwrt-x86-generic-combined-squashfs.img \
-  	   x86/openwrt-x86-generic-combined-ext4.img.gz
+  IMAGES :=
+		x86/openwrt-x86-generic-combined-squashfs.img \
+		x86/openwrt-x86-generic-combined-ext4.img.gz
    
 endef
