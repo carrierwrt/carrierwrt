@@ -25,7 +25,9 @@ define Customization/default
 	SETTINGS := uci-customization.sh
 
 	TESTED := \
-		x86/openwrt-x86-generic-combined-squashfs.img \
-		x86/openwrt-x86-generic-combined-ext4.img.gz
+		x86/openwrt-x86-generic-combined-ext4.img.gz \
+		x86/openwrt-x86-generic-combined-ext4.vdi \
+		x86/openwrt-x86-generic-combined-ext4.vmdk \
+		x86/openwrt-x86-generic-combined-squashfs.img
 
 endef
