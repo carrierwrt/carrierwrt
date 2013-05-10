@@ -3,14 +3,14 @@
 #
 # Example product customization:
 #
-#  Access point for Anyfi's office network
+#  Access point for an office network
 #
 
 define Customization/anyfinetworks
 
   CONFIG += 
 
-  SETTINGS := uci-defaults.sh
+  SETTINGS := uci-customization.sh
 
   TESTED := \
     ar71xx/openwrt-ar71xx-generic-tl-wr941nd-v2-squashfs-factory.bin \

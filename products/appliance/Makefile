@@ -2,7 +2,7 @@
 # (C) 2013 CarrierWrt.org
 
 #
-# Product profile: Appliance
+# Product profile: appliance (Network Appliance)
 #
 
 define Product/appliance
@@ -12,7 +12,7 @@ define Product/appliance
 		CONFIG_PACKAGE_wpad=y \
 		CONFIG_PACKAGE_wpad-mini=n
 
-  SETTINGS := uci-appliance.sh
+  SETTINGS := uci-product.sh
 
 endef
 
@@ -22,7 +22,7 @@ define Customization/default
   		CONFIG_PACKAGE_luci=y \
 		CONFIG_PACKAGE_luci-theme-bootstrap=y
 	
-  SETTINGS := uci-defaults.sh
+  SETTINGS := uci-customization.sh
 
   TESTED := \
     x86/openwrt-x86-generic-combined-squashfs.img \

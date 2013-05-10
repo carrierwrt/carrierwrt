@@ -1,7 +1,7 @@
 # (C) 2013 CarrierWrt.org
 
 #
-# Product profile: AP (Access Point)
+# Product profile: ap (Access Point)
 #
 
 define Product/ap
@@ -11,7 +11,7 @@ define Product/ap
 		CONFIG_PACKAGE_wpad-mini=n \
 		CONFIG_BUSYBOX_CONFIG_TELNETD=n
 
-  SETTINGS := uci-ap.sh
+  SETTINGS := uci-product.sh
 
 endef
 
@@ -21,7 +21,7 @@ define Customization/default
   		CONFIG_PACKAGE_luci=y \
   		CONFIG_PACKAGE_luci-theme-bootstrap=y
 
-  SETTINGS := uci-defaults.sh
+  SETTINGS := uci-customization.sh
 
   TESTED := \
     ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-factory.bin \
