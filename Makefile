@@ -196,7 +196,13 @@ _build-images:
 	scripts/svn-pristine $(OPENWRT_DIR) | sh
 	scripts/svn-pristine $(LUCI_FEEDS_DIR) | sh
 
+	# The special 'files' dir is in svn:ignore so we need to manually delete it
+	rm -rf $(OPENWRT_DIR)/files/*
+
+	# Symlink all packages into OpenWrt
 	true && $(foreach package,$(PACKAGES), ln -fs ../../$(package) $(OPENWRT_DIR)/$(package) &&) true
+
+	# Prepare uci-defaults directory
 	mkdir -p $(OPENWRT_DIR)/files/etc/uci-defaults
 
 	# Load Product
