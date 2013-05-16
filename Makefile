@@ -209,14 +209,14 @@ _build-images:
 	$(eval $(ResetVariables))
 	$(eval $(Product/$(PRODUCT)))
 	if [ -n "$(SETTINGS)" ]; then \
-		cp products/$(PRODUCT)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z01-product || break; \
+		cp products/$(PRODUCT)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z01-product || exit 1; \
 	fi
 
 	# Load Target
 	$(eval $(ResetVariables))
 	$(eval $(Target/$(TARGET)))
 	if [ -n "$(SETTINGS)" ]; then \
-		cp common/targets/$(TARGET)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z02-target || break; \
+		cp common/targets/$(TARGET)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z02-target || exit 1; \
 	fi
 
 	# Load Customization
@@ -225,12 +225,12 @@ ifneq ($(CUSTOMIZATION),)
 	$(eval $(Customization/$(CUSTOMIZATION)))
 	if [ -n "$(SETTINGS)" ]; then \
 		cp products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/$(SETTINGS) \
-			$(OPENWRT_DIR)/files/etc/uci-defaults/z03-customization || break; \
+			$(OPENWRT_DIR)/files/etc/uci-defaults/z03-customization || exit 1; \
 	fi
 else
 	$(eval $(Customization/default))
 	if [ -n "$(SETTINGS)" ]; then \
-		cp products/$(PRODUCT)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z03-customization || break; \
+		cp products/$(PRODUCT)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z03-customization || exit 1; \
 	fi
 endif
 
