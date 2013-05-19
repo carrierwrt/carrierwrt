@@ -7,10 +7,7 @@
 
 define Product/appliance
 
-	CONFIG += \
-		CONFIG_PACKAGE_iw=y \
-		CONFIG_PACKAGE_wpad=y \
-		CONFIG_PACKAGE_wpad-mini=n
+	CONFIG += 
 
 	SETTINGS := uci-product.sh
 
@@ -18,9 +15,7 @@ endef
 
 define Customization/default
 
-	CONFIG += \
-		CONFIG_PACKAGE_luci=y \
-		CONFIG_PACKAGE_luci-theme-bootstrap=y
+	CONFIG += 
 	
 	SETTINGS := uci-customization.sh
 

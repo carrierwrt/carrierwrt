@@ -1,9 +1,5 @@
 #!/bin/sh
 
-# Set LAN ip address to mimize risk of collision
-uci set network.lan.ipaddr=192.168.8.1
-uci commit network
-
 # Set product as hostname
 uci set system.@system[0].hostname=carrier-appliance
 uci commit system

@@ -1,18 +1,25 @@
 #!/bin/sh
 
-# Set dumb default ssid / key
-uci set wireless.radio0.disabled=0
-uci set wireless.@wifi-iface[0].ssid=carrierwrt
-uci set wireless.@wifi-iface[0].encryption=psk2
-uci set wireless.@wifi-iface[0].key=carrierwrt
+MAC=$(uci get wireless.radio0.macaddr | tr 'a-f' 'A-F')
+
+# Set up wireless as open network per default
+uci delete wireless.radio0.disabled
+uci set wireless.@wifi-iface[0].ssid="carrierwrt-$(echo $MAC | cut -c10-17 | tr -d ':')"
 uci commit wireless
 
-# Open up firewall so that above can be changed
+# Open up firewall so that AP can be managed over WAN
 uci add firewall rule
+uci set firewall.@rule[-1].name='Allow HTTP from WAN'
 uci set firewall.@rule[-1].src=wan
 uci set firewall.@rule[-1].target=ACCEPT
 uci set firewall.@rule[-1].proto=tcp
 uci set firewall.@rule[-1].dest_port=80
+uci add firewall rule
+uci set firewall.@rule[-1].name='Allow SSH from WAN'
+uci set firewall.@rule[-1].src=wan
+uci set firewall.@rule[-1].target=ACCEPT
+uci set firewall.@rule[-1].proto=tcp
+uci set firewall.@rule[-1].dest_port=22
 uci commit firewall
 
 # Set bootstrap as theme in luci

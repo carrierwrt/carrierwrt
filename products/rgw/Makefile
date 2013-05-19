@@ -8,6 +8,7 @@
 define Product/rgw
 
 	CONFIG += \
+		CONFIG_BUSYBOX_CONFIG_TELNETD=n \
 		CONFIG_PACKAGE_luci=y
 			
 	SETTINGS := uci-product.sh

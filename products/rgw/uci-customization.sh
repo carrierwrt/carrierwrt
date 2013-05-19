@@ -2,16 +2,15 @@
 
 MAC=$(uci get wireless.radio0.macaddr | tr 'a-f' 'A-F')
 
-# Set up wireless with MAC as default password
-uci set wireless.radio0.disabled=0
-uci set wireless.@wifi-iface[0].ssid="CarrierWrt<$(echo $MAC | cut -c10-15)>"
-uci set wireless.@wifi-iface[0].encryption=psk2
-uci set wireless.@wifi-iface[0].key="$(echo $MAC | sed 's/://g')"
+# Set up wireless with random default passphrase
+uci delete wireless.radio0.disabled
+uci set wireless.@wifi-iface[0].ssid="carrierwrt-$(echo $MAC | cut -c10-17 | tr -d ':')"
+uci set wireless.@wifi-iface[0].encryption=psk-mixed
+uci set wireless.@wifi-iface[0].key="$(tr -cd 'a-zA-Z0-9' < /dev/urandom | head -c 8)"
 uci commit wireless
 
 # Set bootstrap as theme in luci
 uci set luci.main.mediaurlbase=/luci-static/bootstrap
 uci commit luci
-
 
 exit 0
