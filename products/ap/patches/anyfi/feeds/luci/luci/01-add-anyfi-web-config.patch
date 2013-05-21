@@ -1,0 +1,92 @@
+--- luci-0.11+svn9672-orig/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua	2012-12-18 14:58:22.000000000 +0100
++++ luci-0.11+svn9672/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua	2013-05-20 17:06:44.580346801 +0200
+@@ -118,6 +118,7 @@ s.addremove = false
+ s:tab("general", translate("General Setup"))
+ s:tab("macfilter", translate("MAC-Filter"))
+ s:tab("advanced", translate("Advanced Settings"))
++s:tab("mobility", "Anyfi.net")
+ 
+ --[[
+ back = s:option(DummyValue, "_overview", translate("Overview"))
+@@ -377,6 +378,50 @@ if hwtype == "prism2" then
+ 	s:taboption("advanced", Value, "rxantenna", translate("Receiver Antenna"))
+ end
+ 
++------------------- Anyfi.net front-end configuration (by Anyfi Networks AB) -------------------
++
++if fs.access("/sbin/anyfid") then
++        anyfi = s:taboption("mobility", Flag, "anyfi_disabled", translate("Radio Front-End"),
++			    translate("Allow mobile devices to connect to remote Wi-Fi networks through this radio."))
++	anyfi.enabled = 0
++	anyfi.disabled = 1
++	anyfi.default = anyfi.enabled
++	anyfi.rmempty = true
++
++	floor = s:taboption("mobility", ListValue, "anyfi_floor", translate("Minimum Bandwidth"),
++			    translate("The share of total bandwidth that is always available to mobile devices."))
++	floor:value("1", "Minimal (1%)")
++	floor:value("5", "Low (5%)")
++	floor:value("10", "Medium (10%)")
++	floor:value("25", "High (25%)")
++	floor.default = "5"
++	floor:depends({anyfi_disabled="0"})
++
++	ceil = s:taboption("mobility", ListValue, "anyfi_ceiling", translate("Maximum Bandwidth"),
++			   translate("The maximum share of total bandwidth that can be allocated to mobile devices."))
++	ceil:value("25", "Minimal (25%)")
++	ceil:value("50", "Low (50%)")
++	ceil:value("75", "Medium (75%)")
++	ceil:value("100", "High (100%)")
++	ceil.default = "75"
++	ceil:depends({anyfi_disabled="0"})
++end
++
++if fs.access("/sbin/anyfid") or fs.access('/sbin/myfid') then
++	server = s:taboption("mobility", Value, "anyfi_server", translate("Mobility Control Server"))
++	server.datatype = hostname
++	server.optional = true
++
++	function server.remove(self, section)
++		self.write(self, section, "")
++	end
++	function server.write(self, section, value)
++		for _, net in ipairs(wdev:get_wifinets()) do
++			net:set("anyfi_server", value)
++		end
++		self.map:set(section, "anyfi_server", value)
++	end
++end
+ 
+ ----------------------- Interface -----------------------
+ 
+@@ -390,6 +435,7 @@ s:tab("general", translate("General Setu
+ s:tab("encryption", translate("Wireless Security"))
+ s:tab("macfilter", translate("MAC-Filter"))
+ s:tab("advanced", translate("Advanced Settings"))
++s:tab("mobility", "Anyfi.net")
+ 
+ s:taboption("general", Value, "ssid", translate("<abbr title=\"Extended Service Set Identifier\">ESSID</abbr>"))
+ 
+@@ -959,4 +1003,22 @@ if hwtype == "atheros" or hwtype == "mac
+ 	password:depends({mode="sta-wds", eap_type="ttls", encryption="wpa"})
+ end
+ 
++------------------- Anyfi.net back-end configuration (by Anyfi Networks AB) -------------------
++
++local host = server:formvalue(wdev:name()) or wdev:get("anyfi_server")
++if fs.access('/sbin/myfid') and host and host ~= "" then
++	anyfi = s:taboption("mobility", Flag, "anyfi_disabled", translate("Tunnel Termination Back-End"),
++			    translate("Enable seamless and secure remote access to this Wi-Fi network for mobile devices."))
++	anyfi.enabled = 0
++	anyfi.disabled = 1
++	anyfi.default = anyfi.enabled
++	anyfi.rmempty = true
++	anyfi:depends({mode="ap", encryption="psk"})
++	anyfi:depends({mode="ap", encryption="psk2"})
++	anyfi:depends({mode="ap", encryption="psk-mixed"})
++	anyfi:depends({mode="ap", encryption="wpa"})
++	anyfi:depends({mode="ap", encryption="wpa2"})
++	anyfi:depends({mode="ap", encryption="wpa-mixed"})
++end
++
+ return m
