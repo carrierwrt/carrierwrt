@@ -7,7 +7,7 @@
 
 define Product/appliance
 
-	CONFIG += 
+	CONFIG += CONFIG_PACKAGE_anyfi=y
 
 	SETTINGS := uci-product.sh
 
