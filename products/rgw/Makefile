@@ -27,7 +27,10 @@ define Customization/default
 		ar71xx/openwrt-ar71xx-generic-tl-wr941nd-v2-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr941nd-v2-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr2543-v1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr2543-v1-squashfs-sysupgrade.bin
-
+		ar71xx/openwrt-ar71xx-generic-tl-wr2543-v1-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wdr4300-v1-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wdr4300-v1-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-wndr3700v2-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-wndr3700v2-squashfs-sysupgrade.bin
 
 endef
