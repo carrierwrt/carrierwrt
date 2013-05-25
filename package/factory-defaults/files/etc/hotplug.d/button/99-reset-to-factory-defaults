@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ "$BUTTON" = reset -a "$ACTION" = pressed ]; then
+	firstboot                      
+	reboot                      
+fi
+
+exit 0

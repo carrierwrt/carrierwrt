@@ -18,6 +18,9 @@ LUCI_URL     	:= $(LUCI_BASE)/$(CONFIG_LUCI_PATH)/contrib/package@$(CONFIG_LUCI_
 LUCI_FEEDS_DIR  := $(OPENWRT_DIR)/feeds/luci
 PACKAGES        := $(wildcard package/*)
 
+# Required packages
+CONFIG += CONFIG_PACKAGE_factory-defaults=y
+
 # Reset variables
 define ResetVariables
 	SETTINGS =

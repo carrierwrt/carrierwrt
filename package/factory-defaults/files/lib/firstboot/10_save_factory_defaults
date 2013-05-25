@@ -1,0 +1,8 @@
+#!/bin/sh
+
+save_factory_defaults() {
+	mkdir /tmp/factory-defaults-persist && \
+		cp /etc/factory-defaults/persist/* /tmp/factory-defaults-persist/ 2> /dev/null
+}
+
+boot_hook_add jffs2reset save_factory_defaults
