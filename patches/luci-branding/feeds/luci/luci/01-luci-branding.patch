@@ -1,0 +1,13 @@
+--- luci-0.11+svn9672-before/themes/bootstrap/luasrc/view/themes/bootstrap/header.htm	2013-06-12 18:31:12.797972531 +0200
++++ luci-0.11+svn9672-after/themes/bootstrap/luasrc/view/themes/bootstrap/header.htm	2013-06-12 18:32:27.838344651 +0200
+@@ -116,8 +116,8 @@
+  <body class="lang_<%=luci.i18n.context.lang%> <%- if node then %><%= striptags( node.title ) %><%- end %>">
+   <header>
+    <div class="fill">
+-    <div class="container">
+-     <a class="brand" href="#"><%=hostname%></a>
++    <div class="container" style="height: 40px">
++     <a class="brand" href="#"><img src="/luci-static/resources/icons/carrierwrt.png"/></a>
+      <ul class="nav">
+ 	 <%-
+ 		local function submenu(prefix, node)
