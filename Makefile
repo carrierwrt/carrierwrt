@@ -18,6 +18,9 @@ LUCI_URL     	:= $(LUCI_BASE)/$(CONFIG_LUCI_PATH)/contrib/package@$(CONFIG_LUCI_
 LUCI_FEEDS_DIR  := $(OPENWRT_DIR)/feeds/luci
 PACKAGES        := $(wildcard package/*)
 
+# Build in release mode by default
+BUILD ?= release
+
 # Required packages
 CONFIG += CONFIG_PACKAGE_factory-defaults=y
 
@@ -44,6 +47,7 @@ define CleanImage
 	rm -f $(OPENWRT_DIR)/bin/$(1)
 	rm -f firmware/$(PRODUCT)/$(CUSTOMIZATION)/$(notdir $(1))*
 	rm -f firmware/$(PRODUCT)/$(CUSTOMIZATION)/untested/$(notdir $(1))*
+	rm -f firmware/$(PRODUCT)/$(CUSTOMIZATION)/debug/$(notdir $(1))*
 endef
 
 # Clean <images>
@@ -106,6 +110,16 @@ define Install
 	) 
 endef
 
+# InstallDebug <images>
+define InstallDebug
+	mkdir -p firmware/$(PRODUCT)/$(CUSTOMIZATION)/debug
+	$(foreach image,$(1), \
+		$(call InstallImage, \
+			$(OPENWRT_DIR)/bin/$(image), \
+			firmware/$(PRODUCT)/$(CUSTOMIZATION)/debug/$(notdir $(image)))
+	)
+endef
+
 # ======================================================================
 #  User targets
 # ======================================================================
@@ -118,6 +132,7 @@ all: $(OPENWRT_DIR) $(OPENWRT_DIR)/feeds.conf
 help:
 	@echo "============================================================="
 	@echo "VARIABLES:"
+	@echo "    BUILD          Build mode \"release\" (default) or \"debug\""
 	@echo "    PRODUCT        Product profile (unset to build all)"
 	@echo "    TARGET         Target platform (unset to build all)"
 	@echo "    CUSTOMIZATION  Product variant (unset to build all)"
@@ -138,6 +153,7 @@ help:
 
 _info:
 	@echo "==============================================================="
+	@echo " BUILD:          $(BUILD)"
 	@if [ -z "$(PRODUCT)" ]; \
 	    then echo " PRODUCTS:       $(PRODUCTS)"; \
 	    else echo " PRODUCT:        $(PRODUCT)"; \
@@ -161,6 +177,7 @@ ifeq ($(PRODUCT),)
 _build: _build-products
 else
 include products/$(PRODUCT)/Makefile
+include products/$(PRODUCT)/builds/$(BUILD)/Makefile
 
 TARGETS=$(notdir $(wildcard products/$(PRODUCT)/targets/*))
 ifeq ($(TARGET),)
@@ -207,6 +224,11 @@ _build-images:
 
 	# Prepare uci-defaults directory
 	mkdir -p $(OPENWRT_DIR)/files/etc/uci-defaults
+
+	# Load Build
+ifneq ($(BUILD),)
+	$(eval $(Build/$(BUILD)))
+endif
 
 	# Load Product
 	$(eval $(ResetVariables))
@@ -274,7 +296,11 @@ endif
 	$(call Build,$(CONFIG))
 
 	# Install
+ifeq ($(BUILD),debug)
+	$(call InstallDebug,$(IMAGES))
+else
 	$(call Install,$(IMAGES),$(TESTED))
+endif
 
 $(OPENWRT_DIR):
 	svn co $(OPENWRT_URL) $@
