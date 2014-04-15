@@ -9,8 +9,7 @@ define Product/ap
 	CONFIG += \
 		CONFIG_BUSYBOX_CONFIG_TELNETD=n \
 		CONFIG_PACKAGE_wpad-mini=n \
-		CONFIG_PACKAGE_wpad=y \
-		CONFIG_PACKAGE_anyfi=y
+		CONFIG_PACKAGE_wpad=y
 
 	SETTINGS := uci-product.sh
 

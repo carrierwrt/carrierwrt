@@ -8,8 +8,7 @@
 define Product/router
 
 	CONFIG += \
-		CONFIG_PACKAGE_luci=y \
-		CONFIG_PACKAGE_anyfi=y
+		CONFIG_PACKAGE_luci=y
 			
 	SETTINGS := uci-product.sh
 

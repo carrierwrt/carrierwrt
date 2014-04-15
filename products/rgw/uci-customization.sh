@@ -14,11 +14,9 @@ MAC=$(uci get wireless.radio0.macaddr | tr 'a-f' 'A-F')
 if [ ! -e $SAVE/CUSTOMIZATION ]; then
 	# Set up wireless with WPA/WPA2-PSK
 	uci delete wireless.radio0.disabled
-	uci set wireless.radio0.anyfi_server=anyfi.net
 	uci set wireless.@wifi-iface[0].ssid="$(cat $PERSIST/SSID)"
 	uci set wireless.@wifi-iface[0].encryption=psk-mixed
 	uci set wireless.@wifi-iface[0].key="$(cat $PERSIST/KEY)"
-	uci set wireless.@wifi-iface[0].anyfi_server=anyfi.net
 	uci commit wireless
 
 	# Set bootstrap as theme in luci

@@ -14,9 +14,7 @@ if [ ! -e $SAVE/CUSTOMIZATION ]; then
 
 	# Set up wireless
 	uci delete wireless.radio0.disabled
-	uci set wireless.radio0.anyfi_server=anyfi.net
 	uci set wireless.@wifi-iface[0].ssid="$(cat $PERSIST/SSID)"
-	uci set wireless.@wifi-iface[0].anyfi_server=anyfi.net
 	uci commit wireless || exit 1
 
 	# Open up firewall so that AP can be managed over WAN
