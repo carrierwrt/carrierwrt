@@ -28,12 +28,6 @@ define Target/ar71xx
 		ar71xx/openwrt-ar71xx-generic-all0315n-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-all0315n-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-all0315n-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-ap121-4M-kernel.bin \
-		ar71xx/openwrt-ar71xx-generic-ap121-4M-rootfs-squashfs.bin \
-		ar71xx/openwrt-ar71xx-generic-ap121-4M-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-ap121-mini-kernel.bin \
-		ar71xx/openwrt-ar71xx-generic-ap121-mini-rootfs-squashfs.bin \
-		ar71xx/openwrt-ar71xx-generic-ap121-mini-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ap136-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-ap136-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-ap136-squashfs-sysupgrade.bin \
@@ -95,8 +89,6 @@ define Target/ar71xx
 		ar71xx/openwrt-ar71xx-generic-mzk-w04nu-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-mzk-w300nh-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-mzk-w300nh-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-nbg460n_550n_550nh-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-nbg460n_550n_550nh-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-nbg460n_550n_550nh-u-boot.bin \
 		ar71xx/openwrt-ar71xx-generic-om2p-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-pb42-kernel.bin \
@@ -105,9 +97,6 @@ define Target/ar71xx
 		ar71xx/openwrt-ar71xx-generic-pb44-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-pb44-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-pb44-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-pb92-kernel.bin \
-		ar71xx/openwrt-ar71xx-generic-pb92-rootfs-squashfs.bin \
-		ar71xx/openwrt-ar71xx-generic-pb92-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-rw2458n-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-rw2458n-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tew-632brp-squashfs-factory.bin \
@@ -120,8 +109,6 @@ define Target/ar71xx
 		ar71xx/openwrt-ar71xx-generic-tew-673gru-squashfs-backup-loader.bin \
 		ar71xx/openwrt-ar71xx-generic-tew-673gru-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-tew-673gru-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tew-712br-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tew-712br-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-mr11u-v1-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-mr11u-v1-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-mr3020-v1-squashfs-factory.bin \
@@ -229,12 +216,6 @@ define Target/ar71xx
 		ar71xx/openwrt-ar71xx-generic-wndrmac-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-wndrmacv2-squashfs-factory.img \
 		ar71xx/openwrt-ar71xx-generic-wndrmacv2-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-wp543-squashfs-16M-factory.img \
-		ar71xx/openwrt-ar71xx-generic-wp543-squashfs-4M-factory.img \
-		ar71xx/openwrt-ar71xx-generic-wp543-squashfs-8M-factory.img \
-		ar71xx/openwrt-ar71xx-generic-wpe72-squashfs-16M-factory.img \
-		ar71xx/openwrt-ar71xx-generic-wpe72-squashfs-4M-factory.img \
-		ar71xx/openwrt-ar71xx-generic-wpe72-squashfs-8M-factory.img \
 		ar71xx/openwrt-ar71xx-generic-wrt160nl-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-wrt160nl-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-wrt400n-squashfs-factory.bin \
