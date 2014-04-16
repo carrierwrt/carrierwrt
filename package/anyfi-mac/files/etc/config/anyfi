@@ -1,0 +1,6 @@
+config anyfi controller
+	option	'hostname'	'demo.anyfi.net'
+#	option	'key'		'/path/to/public_key.pem'
+
+config anyfi optimizer
+#	option	'key'		'/path/to/public_key.pem'

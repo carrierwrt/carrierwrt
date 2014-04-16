@@ -1,0 +1,54 @@
+#!/bin/sh
+
+if [ $# -lt 1 ]; then
+   echo "Check if a WLAN driver type is supported by Anyfi.net radio software."
+   echo "Usage: $0 {mac80211|...}"
+   exit 1
+fi
+
+number() {
+   echo $2 | sed -e 's/[^0-9]/ /g' | cut -d' ' -f $1
+}
+
+major() {
+   number 1 $1
+}
+
+minor() {
+   number 2 $1
+}
+
+case $1 in
+   mac80211)
+      COMPAT_VER=$(opkg list-installed kmod-mac80211 | cut -d'+' -f2)
+      KERNEL_VER=$(uname -r)
+
+      # Future kernels > 3.x are OK
+      [ "$(major $KERNEL_VER)" -gt 3  ] && return 0
+
+      # The required commit 86c228a7627f3f2776893da47592234140fbfba8
+      # for mac80211 support was introduced in kernel 3.12.
+      [ "$(major $KERNEL_VER)" -eq  3 ] && \
+      [ "$(minor $KERNEL_VER)" -ge 12 ] && return 0
+
+      [ "$(major $COMPAT_VER)" -gt 2013 ] && return 0
+      [ "$(major $COMPAT_VER)" -eq 2013 ] && \
+      [ "$(minor $COMPAT_VER)" -ge   11 ] && return 0
+
+      cat <<EOF
+Support for mac80211 requires Linux kernel >= 3.12 or
+compat-wireless >= 2013-11-05. Please update your system.
+EOF
+      ;;
+
+   *)
+      cat<<EOF
+WLAN driver \"$1\" is not supported by the Anyfi.net radio software.
+Improved drivers with Anyfi.net support are available for Broadcom,
+Qualcomm Atheros, Ralink and Realtek chipsets. Please contact
+support@anyfi.net for updated drivers, reference integrations and
+commercial integration services.
+EOF
+      ;;
+esac
+exit 1
