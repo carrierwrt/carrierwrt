@@ -17,6 +17,10 @@ if [ ! -e $SAVE/CUSTOMIZATION ]; then
 	uci set wireless.@wifi-iface[0].ssid="$(cat $PERSIST/SSID)"
 	uci commit wireless || exit 1
 
+	# Set anyfi controller (default is demo.anyfi.net)
+	#uci set anyfi.controller.hostname="your.own.controller"
+	#uci commit anyfi
+
 	# Open up firewall so that AP can be managed over WAN
 	uci add firewall rule
 	uci set firewall.@rule[-1].name='Allow HTTP from WAN'
