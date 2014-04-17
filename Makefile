@@ -80,6 +80,7 @@ endef
 
 # Patch <config> <dir>
 define Patch
+	$(call PatchOne,$(2)/base)
 	$(foreach package,$(notdir $(wildcard $(2)/*)),\
 		$(if $(findstring CONFIG_PACKAGE_$(package)=y,$(1)),\
 			$(call PatchOne,$(2)/$(package)))

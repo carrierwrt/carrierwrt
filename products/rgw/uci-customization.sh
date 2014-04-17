@@ -19,6 +19,10 @@ if [ ! -e $SAVE/CUSTOMIZATION ]; then
 	uci set wireless.@wifi-iface[0].key="$(cat $PERSIST/KEY)"
 	uci commit wireless
 
+	# Set anyfi controller (default is demo.anyfi.net)
+	#uci set anyfi.controller.hostname="your.own.controller"
+	#uci commit anyfi
+
 	# Set bootstrap as theme in luci
 	uci set luci.main.mediaurlbase=/luci-static/bootstrap
 	uci commit luci
