@@ -8,7 +8,9 @@ if [ ! -e $SAVE/PRODUCT ]; then
 
 	# Move all wired interfaces to wan
 	uci set network.lan.ifname=""
-	uci set network.wan.type="bridge"
+	uci set network.wan=interface
+	uci set network.wan.type=bridge
+	uci set network.wan.proto=dhcp
 	uci set network.wan.ifname="$LANIFS $WANIFS"
 	uci commit network || exit 1
 
