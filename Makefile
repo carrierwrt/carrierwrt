@@ -93,10 +93,10 @@ define Build
 	$(MAKE) MAKEOVERRIDES='' -C $(OPENWRT_DIR) V=$(V)
 endef
 
-# InstallImage <src> <dst>
+# InstallImage <img> <dir>
 define InstallImage
 	cp $(1) $(2)
-	md5sum $(2) > $(2).md5
+	cd $(2) && md5sum $(notdir $(1)) > $(notdir $(1)).md5
 endef
 
 # Install <images> <tested>
@@ -107,7 +107,7 @@ define Install
 		$(call InstallImage, \
 			$(OPENWRT_DIR)/bin/$(image), \
 			firmware/$(PRODUCT)/$(CUSTOMIZATION)/$(if \
-				$(findstring $(image),$(2)),$(notdir $(image)),untested/$(notdir $(image))))
+				$(findstring $(image),$(2)),,untested/))
 	) 
 endef
 
@@ -117,7 +117,7 @@ define InstallDebug
 	$(foreach image,$(1), \
 		$(call InstallImage, \
 			$(OPENWRT_DIR)/bin/$(image), \
-			firmware/$(PRODUCT)/$(CUSTOMIZATION)/debug/$(notdir $(image)))
+			firmware/$(PRODUCT)/$(CUSTOMIZATION)/debug/)
 	)
 endef
 
