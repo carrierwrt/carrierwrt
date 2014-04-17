@@ -1,0 +1,10 @@
+--- package/base-files/files/lib/firstboot/20_reset_clear_jffs.orig	2013-08-21 16:38:38.258285332 +0200
++++ package/base-files/files/lib/firstboot/20_reset_clear_jffs	2013-08-21 16:38:46.534326363 +0200
+@@ -7,7 +7,6 @@
+     [ "$reset_has_fo" = "true" ] && {
+ 	rm -rf $jffs/* 2>&-
+ 	mount -o remount $jffs / 2>&-
+-	exit 0
+     } || reset_has_fo=false
+ }
+ 

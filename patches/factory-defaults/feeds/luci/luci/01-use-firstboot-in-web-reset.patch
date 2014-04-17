@@ -1,0 +1,11 @@
+--- luci-0.11+svn9672-before/modules/admin-full/luasrc/controller/admin/system.lua	2012-12-25 03:45:42.000000000 +0100
++++ luci-0.11+svn9672-after/modules/admin-full/luasrc/controller/admin/system.lua	2013-08-21 18:08:48.553812096 +0200
+@@ -302,7 +302,7 @@
+ 			msg   = luci.i18n.translate("The system is erasing the configuration partition now and will reboot itself when finished."),
+ 			addr  = "192.168.1.1"
+ 		})
+-		fork_exec("killall dropbear uhttpd; sleep 1; mtd -r erase rootfs_data")
++		fork_exec("killall dropbear uhttpd; sleep 1; firstboot; reboot")
+ 	else
+ 		--
+ 		-- Overview
