@@ -34,12 +34,13 @@ starting point for yours.
 How to get started
 ==================
 
-You need to have installed git, svn, gcc, binutils, patch, bzip2, flex, make,
-gettext, pkg-config, unzip, libz-dev, libncurses-dev, gawk and libc headers.
-For example, on a Debian based system run the command:
+You need to have installed git, svn, gcc, g++, binutils, patch, bzip2, flex,
+make, gettext, pkg-config, unzip, libz-dev, libncurses-dev, gawk and libc
+headers. For example, on a Debian based system run the command:
 
-  apt-get install -y git subversion gcc binutils patch bzip2 flex make gettext \
-                     pkg-config unzip libz-dev libncurses-dev gawk gcc-multilib
+  apt-get install -y git subversion gcc g++ binutils patch bzip2 flex make \
+                     gettext pkg-config unzip libz-dev libncurses-dev gawk \
+                     gcc-multilib
 
 Then:
 
