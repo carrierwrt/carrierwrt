@@ -155,8 +155,6 @@ define Target/ar71xx
 		ar71xx/openwrt-ar71xx-generic-tl-wr741nd-v4-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr743nd-v1-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr743nd-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr841nd-v1.5-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr841nd-v1.5-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr841nd-v3-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr841nd-v3-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr841nd-v5-squashfs-factory.bin \
