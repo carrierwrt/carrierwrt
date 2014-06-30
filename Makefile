@@ -13,6 +13,7 @@ V ?= 0
 OPENWRT_BASE 	:= svn://svn.openwrt.org/openwrt
 OPENWRT_DIR  	:= openwrt
 OPENWRT_URL  	:= $(OPENWRT_BASE)/$(CONFIG_OPENWRT_PATH)@$(CONFIG_OPENWRT_REV)
+PACKAGES_URL	:= $(OPWNWRT_BASE)/packages@$(CONFIG_OPENWRT_REV)
 LUCI_BASE    	:= http://svn.luci.subsignal.org/luci
 LUCI_URL     	:= $(LUCI_BASE)/$(CONFIG_LUCI_PATH)/contrib/package@$(CONFIG_LUCI_REV)
 LUCI_FEEDS_DIR  := $(OPENWRT_DIR)/feeds/luci
@@ -307,7 +308,7 @@ $(OPENWRT_DIR):
 	svn co $(OPENWRT_URL) $@
 
 $(OPENWRT_DIR)/feeds.conf:
-	echo "src-svn packages svn://svn.openwrt.org/openwrt/packages" > $@
+	echo "src-svn packages $(PACKAGES_URL)" > $@
 	echo "src-svn luci $(LUCI_URL)" >> $@
 	$(OPENWRT_DIR)/scripts/feeds update
 	$(OPENWRT_DIR)/scripts/feeds install luci
