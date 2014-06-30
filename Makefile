@@ -265,6 +265,13 @@ endif
 	# Lock LuCI to specific revision
 	sed -i 's|^PKG_BRANCH\:=.*|PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)|' \
 			$(LUCI_FEEDS_DIR)/luci/Makefile
+
+	# Write version files
+	echo $(OPENWRT_URL)   > $(OPENWRT_DIR)/files/etc/carrierwrt_openwrt_url
+	echo $(PRODUCT)       > $(OPENWRT_DIR)/files/etc/carrierwrt_product
+	echo $(CUSTOMIZATION) > $(OPENWRT_DIR)/files/etc/carrierwrt_customization
+	(echo -n carrierwrt- ; git describe --always) \
+	                      > $(OPENWRT_DIR)/files/etc/carrierwrt_version
 	
 	# Apply product changes
 	-cp -r products/$(PRODUCT)/files/* $(OPENWRT_DIR)/files/
