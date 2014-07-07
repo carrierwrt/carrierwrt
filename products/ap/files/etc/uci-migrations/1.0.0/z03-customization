@@ -1,6 +1,5 @@
 #!/bin/sh
 
-SAVE=/etc/factory-defaults/save
 PERSIST=/etc/factory-defaults/persist
 
 MAC=$(uci get wireless.radio0.macaddr | tr 'a-f' 'A-F')
@@ -9,17 +8,11 @@ MAC=$(uci get wireless.radio0.macaddr | tr 'a-f' 'A-F')
 [ -e $PERSIST/SSID ] || \
 	echo "carrierwrt-$(echo $MAC | cut -c10-17 | tr -d ':')" > $PERSIST/SSID
 
-# Customize (if we haven't already)
-if [ ! -e $SAVE/CUSTOMIZATION ]; then
-
+if [ "$UCI_MIGRATION_ACTION" == "RESET" ]; then
 	# Set up wireless
 	uci delete wireless.radio0.disabled
 	uci set wireless.@wifi-iface[0].ssid="$(cat $PERSIST/SSID)"
 	uci commit wireless || exit 1
-
-	# Set anyfi controller (default is demo.anyfi.net)
-	#uci set anyfi.controller.hostname="your.own.controller"
-	#uci commit anyfi
 
 	# Open up firewall so that AP can be managed over WAN
 	uci add firewall rule
@@ -39,8 +32,6 @@ if [ ! -e $SAVE/CUSTOMIZATION ]; then
 	# Set bootstrap as theme in luci
 	uci set luci.main.mediaurlbase=/luci-static/bootstrap
 	uci commit luci || exit 1
-
-	echo '' > $SAVE/CUSTOMIZATION
 fi
 
 exit 0

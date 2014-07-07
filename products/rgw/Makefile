@@ -12,8 +12,6 @@ define Product/rgw
 		CONFIG_PACKAGE_luci=y \
 		CONFIG_PACKAGE_anyfi-mac=y
 			
-	SETTINGS := uci-product.sh
-
 endef
 
 define Customization/default
@@ -22,8 +20,6 @@ define Customization/default
 		CONFIG_PACKAGE_luci-theme-bootstrap=y \
 		CONFIG_PACKAGE_luci-branding=y
 	
-	SETTINGS := uci-customization.sh
-
 	TESTED := \
 		ar71xx/openwrt-ar71xx-generic-tl-wr841nd-v5-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr841nd-v5-squashfs-sysupgrade.bin \

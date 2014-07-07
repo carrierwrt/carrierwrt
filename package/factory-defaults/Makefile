@@ -1,13 +1,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME    := factory-defaults
-PKG_VERSION := 1.0
+PKG_VERSION := 1.1
 PKG_RELEASE := 1
 
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)
-  SECTION  := net
+  SECTION  := base
   CATEGORY := Base system
   TITLE    := Persistent factory default settings
   URL      := 
@@ -36,6 +36,10 @@ define Package/$(PKG_NAME)/install
 	# The two directories that will be saved/persisted:
 	$(INSTALL_DIR)  $(1)/etc/factory-defaults/persist
 	$(INSTALL_DIR)  $(1)/etc/factory-defaults/save
+	# The uci-defaults script that will apply setup/migrations:
+	$(INSTALL_DIR)  $(1)/etc/uci-defaults
+	$(INSTALL_BIN)  ./files/etc/uci-defaults/z00-factory-defaults \
+			$(1)/etc/uci-defaults/z00-factory-defaults
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME),))

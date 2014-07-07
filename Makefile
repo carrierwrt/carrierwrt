@@ -18,17 +18,13 @@ LUCI_BASE    	:= http://svn.luci.subsignal.org/luci
 LUCI_URL     	:= $(LUCI_BASE)/$(CONFIG_LUCI_PATH)/contrib/package@$(CONFIG_LUCI_REV)
 LUCI_FEEDS_DIR  := $(OPENWRT_DIR)/feeds/luci
 PACKAGES        := $(wildcard package/*)
+VERSION         := $(shell git describe --always | cut -c2-)
 
 # Build in release mode by default
 BUILD ?= release
 
 # Required packages
 CONFIG += CONFIG_PACKAGE_factory-defaults=y
-
-# Reset variables
-define ResetVariables
-	SETTINGS =
-endef
 
 # WriteConfig <line>
 define WriteConfig
@@ -155,6 +151,7 @@ help:
 
 _info:
 	@echo "==============================================================="
+	@echo " VERSION:        $(VERSION)"
 	@echo " BUILD:          $(BUILD)"
 	@if [ -z "$(PRODUCT)" ]; \
 	    then echo " PRODUCTS:       $(PRODUCTS)"; \
@@ -224,64 +221,44 @@ _build-images:
 	# Symlink all packages into OpenWrt
 	true && $(foreach package,$(PACKAGES), ln -fs ../../$(package) $(OPENWRT_DIR)/$(package) &&) true
 
-	# Prepare uci-defaults directory
-	mkdir -p $(OPENWRT_DIR)/files/etc/uci-defaults
-
 	# Load Build
 ifneq ($(BUILD),)
 	$(eval $(Build/$(BUILD)))
 endif
 
 	# Load Product
-	$(eval $(ResetVariables))
 	$(eval $(Product/$(PRODUCT)))
-	if [ -n "$(SETTINGS)" ]; then \
-		cp products/$(PRODUCT)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z01-product || exit 1; \
-	fi
 
 	# Load Target
-	$(eval $(ResetVariables))
 	$(eval $(Target/$(TARGET)))
-	if [ -n "$(SETTINGS)" ]; then \
-		cp common/targets/$(TARGET)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z02-target || exit 1; \
-	fi
 
 	# Load Customization
-	$(eval $(ResetVariables))
 ifneq ($(CUSTOMIZATION),)
 	$(eval $(Customization/$(CUSTOMIZATION)))
-	if [ -n "$(SETTINGS)" ]; then \
-		cp products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/$(SETTINGS) \
-			$(OPENWRT_DIR)/files/etc/uci-defaults/z03-customization || exit 1; \
-	fi
 else
 	$(eval $(Customization/default))
-	if [ -n "$(SETTINGS)" ]; then \
-		cp products/$(PRODUCT)/$(SETTINGS) $(OPENWRT_DIR)/files/etc/uci-defaults/z03-customization || exit 1; \
-	fi
 endif
-
 
 	# Lock LuCI to specific revision
 	sed -i 's|^PKG_BRANCH\:=.*|PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)|' \
 			$(LUCI_FEEDS_DIR)/luci/Makefile
 
-	# Write version files
+	# Write version information
+	mkdir -p $(OPENWRT_DIR)/files/etc/
+	echo $(VERSION)       > $(OPENWRT_DIR)/files/etc/carrierwrt_version
 	echo $(OPENWRT_URL)   > $(OPENWRT_DIR)/files/etc/carrierwrt_openwrt_url
 	echo $(PRODUCT)       > $(OPENWRT_DIR)/files/etc/carrierwrt_product
 	echo $(CUSTOMIZATION) > $(OPENWRT_DIR)/files/etc/carrierwrt_customization
-	(echo -n carrierwrt- ; git describe --always) \
-	                      > $(OPENWRT_DIR)/files/etc/carrierwrt_version
 	
 	# Apply product changes
-	-cp -r products/$(PRODUCT)/files/* $(OPENWRT_DIR)/files/
+	-cp -rL products/$(PRODUCT)/files/* $(OPENWRT_DIR)/files/
 
 	# Apply target changes
-	-cp -r products/$(PRODUCT)/targets/$(TARGET)/files/* $(OPENWRT_DIR)/files/
+	-cp -rL products/$(PRODUCT)/targets/$(TARGET)/files/* $(OPENWRT_DIR)/files/
 
 ifneq ($(CUSTOMIZATION),)
 	# Apply customizations
-	-cp -r products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/files/* $(OPENWRT_DIR)/files/
+	-cp -rL products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/files/* $(OPENWRT_DIR)/files/
 endif
 
 	# Apply base patches

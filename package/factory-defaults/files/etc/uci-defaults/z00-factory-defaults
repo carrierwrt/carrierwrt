@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# This script will run the migrations /etc/uci-migrations/[version] whenever
+# there is a firmware upgrade, in order to keep uci settings into sync with
+# the firmware version. A reset to factory defaults (or firmware upgrade with
+# settings discarded) will run all the uci migrations, while a firmware upgrade
+# with settings kept will only run those with [version] > [previous firmware].
+#
+
+if [ -n "$(ls /etc/factory-defaults/save/)" ]; then
+	export UCI_MIGRATION_ACTION=UPGRADE
+
+else
+	export UCI_MIGRATION_ACTION=RESET
+fi
+
+DONE=$(cat /etc/factory-defaults/save/UCI_MIGRATION_DONE)
+LAST=$(cat /etc/carrierwrt_version)
+
+[ -z "$DONE" ] && DONE="0.0.0"
+
+# Which migrations should be run? Everything with version
+# $DONE < [version] <= $LAST. We use 'ls -v' to figure this out:
+
+touch /etc/uci-migrations/$DONE
+touch /etc/uci-migrations/$LAST
+
+RUN=0
+ls -v /etc/uci-migrations/ | while read vers; do
+	if [ "$RUN" -eq 1 -a -d "/etc/uci-migrations/$vers" ]; then
+		for script in /etc/uci-migrations/$vers/*; do
+			sh $script
+		done
+		
+		echo $vers > /etc/factory-defaults/save/UCI_MIGRATION_DONE
+	fi
+	[ "$vers" == "$DONE" ] && RUN=1
+	[ "$vers" == "$LAST" ] && RUN=0
+done
+
+exit 0

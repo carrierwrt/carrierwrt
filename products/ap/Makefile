@@ -12,8 +12,6 @@ define Product/ap
 		CONFIG_PACKAGE_wpad=y \
 		CONFIG_PACKAGE_anyfi-mac=y
 
-	SETTINGS := uci-product.sh
-
 endef
 
 define Customization/default
@@ -22,8 +20,6 @@ define Customization/default
 		CONFIG_PACKAGE_luci=y \
 		CONFIG_PACKAGE_luci-theme-bootstrap=y \
 		CONFIG_PACKAGE_luci-branding=y
-
-	SETTINGS := uci-customization.sh
 
 	TESTED := \
 		ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-factory.bin \

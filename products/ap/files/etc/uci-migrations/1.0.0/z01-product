@@ -1,8 +1,6 @@
 #!/bin/sh
 
-SAVE=/etc/factory-defaults/save
-
-if [ ! -e $SAVE/PRODUCT ]; then
+if [ "$UCI_MIGRATION_ACTION" == "RESET" ]; then
 	LANIFS=$(uci get network.lan.ifname)
 	WANIFS=$(uci get network.wan.ifname)
 
@@ -30,8 +28,6 @@ if [ ! -e $SAVE/PRODUCT ]; then
 	uci set system.@system[0].hostname=carrier-ap
 	uci commit system
 	echo $(uci get system.@system[0].hostname) > /proc/sys/kernel/hostname
-
-	echo 'ap' > $SAVE/PRODUCT
 fi
 
 exit 0

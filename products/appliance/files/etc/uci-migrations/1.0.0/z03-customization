@@ -1,8 +1,6 @@
 #!/bin/sh
 
-SAVE=/etc/factory-defaults/save
-
-if [ ! -e $SAVE/CUSTOMIZATION ]; then
+if [ "$UCI_MIGRATION_ACTION" == "RESET" ]; then
 	# Set up networking:
 	#
 	#  eth0 - WAN
@@ -25,8 +23,6 @@ if [ ! -e $SAVE/CUSTOMIZATION ]; then
 	uci set network.adm.ifname=eth2
 	uci set network.adm.gateway='0.0.0.0'
 	uci commit
-
-	echo '' > $SAVE/CUSTOMIZATION
 fi
 
 exit 0
