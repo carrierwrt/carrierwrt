@@ -13,15 +13,13 @@ V ?= 0
 OPENWRT_BASE 	:= svn://svn.openwrt.org/openwrt
 OPENWRT_DIR  	:= openwrt
 OPENWRT_URL  	:= $(OPENWRT_BASE)/$(CONFIG_OPENWRT_PATH)@$(CONFIG_OPENWRT_REV)
-PACKAGES_URL	:= $(OPWNWRT_BASE)/packages@$(CONFIG_OPENWRT_REV)
+PACKAGES_BASE	:= $(OPENWRT_BASE)
+PACKAGES_URL	:= $(PACKAGES_BASE)/$(CONFIG_PACKAGES_PATH)@$(CONFIG_PACKAGES_REV)
 LUCI_BASE    	:= http://svn.luci.subsignal.org/luci
 LUCI_URL     	:= $(LUCI_BASE)/$(CONFIG_LUCI_PATH)/contrib/package@$(CONFIG_LUCI_REV)
-LUCI_FEEDS_DIR  := $(OPENWRT_DIR)/feeds/luci
-PACKAGES        := $(wildcard package/*)
-VERSION         := $(shell git describe --always | cut -c2-)
+VERSION     	:= $(shell git describe --always | cut -c2-)
 
-# Build in release mode by default
-BUILD ?= release
+FWSUBDIR     	:= $(subst default,,$(CUSTOMIZATION))
 
 # Required packages
 CONFIG += CONFIG_PACKAGE_factory-defaults=y
@@ -42,9 +40,8 @@ endef
 # CleanImage <image>
 define CleanImage
 	rm -f $(OPENWRT_DIR)/bin/$(1)
-	rm -f firmware/$(PRODUCT)/$(CUSTOMIZATION)/$(notdir $(1))*
-	rm -f firmware/$(PRODUCT)/$(CUSTOMIZATION)/untested/$(notdir $(1))*
-	rm -f firmware/$(PRODUCT)/$(CUSTOMIZATION)/debug/$(notdir $(1))*
+	rm -f firmware/$(PRODUCT)/$(FWSUBDIR)/$(notdir $(1))*
+	rm -f firmware/$(PRODUCT)/$(FWSUBDIR)/untested/$(notdir $(1))*
 endef
 
 # Clean <images>
@@ -90,32 +87,25 @@ define Build
 	$(MAKE) MAKEOVERRIDES='' -C $(OPENWRT_DIR) V=$(V)
 endef
 
+# ImageName <img>
+ImageName = $(subst openwrt,carrierwrt-$(VERSION),$(notdir $(1)))
+
 # InstallImage <img> <dir>
 define InstallImage
-	cp $(1) $(2)
-	cd $(2) && md5sum $(notdir $(1)) > $(notdir $(1)).md5
+	cp $(1) $(2)/$(call ImageName,$(1))
+	cd $(2) && md5sum $(call ImageName,$(1)) > $(call ImageName,$(1)).md5
 endef
 
 # Install <images> <tested>
 define Install
-	mkdir -p firmware/$(PRODUCT)/$(CUSTOMIZATION)
-	mkdir -p firmware/$(PRODUCT)/$(CUSTOMIZATION)/untested
+	mkdir -p firmware/$(PRODUCT)/$(FWSUBDIR)
+	mkdir -p firmware/$(PRODUCT)/$(FWSUBDIR)/untested
 	$(foreach image,$(1), \
 		$(call InstallImage, \
 			$(OPENWRT_DIR)/bin/$(image), \
-			firmware/$(PRODUCT)/$(CUSTOMIZATION)/$(if \
-				$(findstring $(image),$(2)),,untested/))
+			firmware/$(PRODUCT)/$(FWSUBDIR)$(if \
+				$(findstring $(image),$(2)),,/untested))
 	) 
-endef
-
-# InstallDebug <images>
-define InstallDebug
-	mkdir -p firmware/$(PRODUCT)/$(CUSTOMIZATION)/debug
-	$(foreach image,$(1), \
-		$(call InstallImage, \
-			$(OPENWRT_DIR)/bin/$(image), \
-			firmware/$(PRODUCT)/$(CUSTOMIZATION)/debug/)
-	)
 endef
 
 # ======================================================================
@@ -123,14 +113,13 @@ endef
 # ======================================================================
 
 all: $(OPENWRT_DIR) $(OPENWRT_DIR)/feeds.conf
-	$(MAKE) _touch
+	$(MAKE) _check
 	$(MAKE) _build
 	$(MAKE) _info
 
 help:
 	@echo "============================================================="
 	@echo "VARIABLES:"
-	@echo "    BUILD          Build mode \"release\" (default) or \"debug\""
 	@echo "    PRODUCT        Product profile (unset to build all)"
 	@echo "    TARGET         Target platform (unset to build all)"
 	@echo "    CUSTOMIZATION  Product variant (unset to build all)"
@@ -149,10 +138,17 @@ help:
 #  Internal targets
 # ======================================================================
 
+_check:
+	@if ! svn info $(OPENWRT_DIR) | grep -q "Revision: $(CONFIG_OPENWRT_REV)"; then \
+		echo "WARNING: Up/downgrading openwrt. Dependency tracking may not work!"; \
+		svn update -r $(CONFIG_OPENWRT_REV) $(OPENWRT_DIR); \
+	fi
+	@svn info $(OPENWRT_DIR)/feeds/luci     | grep -q "Revision: $(CONFIG_LUCI_REV)"
+	@svn info $(OPENWRT_DIR)/feeds/packages | grep -q "Revision: $(CONFIG_PACKAGES_REV)"
+
 _info:
 	@echo "==============================================================="
 	@echo " VERSION:        $(VERSION)"
-	@echo " BUILD:          $(BUILD)"
 	@if [ -z "$(PRODUCT)" ]; \
 	    then echo " PRODUCTS:       $(PRODUCTS)"; \
 	    else echo " PRODUCT:        $(PRODUCT)"; \
@@ -168,15 +164,11 @@ _info:
 	@echo " Firmware images are in $(PWD)/firmware/"
 	@echo "==============================================================="
 
-_touch:
-	$(foreach package,$(PACKAGES),$(shell touch $(package)/Makefile))
-
 PRODUCTS=$(notdir $(wildcard products/*))
 ifeq ($(PRODUCT),)
 _build: _build-products
 else
 include products/$(PRODUCT)/Makefile
-include products/$(PRODUCT)/builds/$(BUILD)/Makefile
 
 TARGETS=$(notdir $(wildcard products/$(PRODUCT)/targets/*))
 ifeq ($(TARGET),)
@@ -184,12 +176,10 @@ _build: _build-targets
 else
 include products/$(PRODUCT)/targets/$(TARGET)/Makefile
 
-CUSTOMIZATIONS=$(notdir $(wildcard products/$(PRODUCT)/customizations/*))
+CUSTOMIZATIONS=$(subst Customization/,,$(filter-out %/prebuild,$(filter Customization/%,$(.VARIABLES))))
 ifeq ($(CUSTOMIZATION),)
 _build: _build-customizations
 else 
-include products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/Makefile
-
 _build: _build-images
 endif
 endif
@@ -205,26 +195,29 @@ _build-targets:
 	  $(MAKE) _build-customizations TARGET=$(target) &&) true
 
 _build-customizations:
-	$(MAKE) _build-images
 	$(foreach customization,$(CUSTOMIZATIONS),\
 	  $(MAKE) _build-images CUSTOMIZATION=$(customization) &&) true
 
 _build-images:
 
-	# Revert openwrt and luci to pristine condition
+	# Revert openwrt and feeds to pristine condition
 	scripts/svn-pristine $(OPENWRT_DIR) | sh
-	scripts/svn-pristine $(LUCI_FEEDS_DIR) | sh
+	for feed in $(OPENWRT_DIR)/feeds/*; do \
+		if [ -d $$feed/.svn ]; then \
+			 scripts/svn-pristine $$feed | sh; \
+		fi \
+	done
 
 	# The special 'files' dir is in svn:ignore so we need to manually delete it
 	rm -rf $(OPENWRT_DIR)/files/*
 
 	# Symlink all packages into OpenWrt
-	true && $(foreach package,$(PACKAGES), ln -fs ../../$(package) $(OPENWRT_DIR)/$(package) &&) true
-
-	# Load Build
-ifneq ($(BUILD),)
-	$(eval $(Build/$(BUILD)))
-endif
+	for package in package/*; do \
+		if [ -d $(OPENWRT_DIR)/$$package ]; then \
+			rm -rf $(OPENWRT_DIR)/$$package; \
+		fi; \
+		ln -fs ../../$$package $(OPENWRT_DIR)/$$package; \
+	done
 
 	# Load Product
 	$(eval $(Product/$(PRODUCT)))
@@ -233,15 +226,11 @@ endif
 	$(eval $(Target/$(TARGET)))
 
 	# Load Customization
-ifneq ($(CUSTOMIZATION),)
 	$(eval $(Customization/$(CUSTOMIZATION)))
-else
-	$(eval $(Customization/default))
-endif
 
-	# Lock LuCI to specific revision
+	# HACK - Lock LuCI to specific revision
 	sed -i 's|^PKG_BRANCH\:=.*|PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)|' \
-			$(LUCI_FEEDS_DIR)/luci/Makefile
+			$(OPENWRT_DIR)/feeds/luci/luci/Makefile
 
 	# Write version information
 	mkdir -p $(OPENWRT_DIR)/files/etc/
@@ -256,11 +245,6 @@ endif
 	# Apply target changes
 	-cp -rL products/$(PRODUCT)/targets/$(TARGET)/files/* $(OPENWRT_DIR)/files/
 
-ifneq ($(CUSTOMIZATION),)
-	# Apply customizations
-	-cp -rL products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/files/* $(OPENWRT_DIR)/files/
-endif
-
 	# Apply base patches
 	$(call Patch,$(CONFIG),patches)
 
@@ -270,31 +254,30 @@ endif
 	# Apply target patches
 	$(call Patch,$(CONFIG),common/targets/$(TARGET)/patches)
 
-ifneq ($(CUSTOMIZATION),)
-	# Apply customization patches
-	$(call Patch,$(CONFIG),products/$(PRODUCT)/customizations/$(CUSTOMIZATION)/patches)
-endif
-
 	# Clean old images
 	$(call Clean,$(IMAGES))
-	
+
+	# Customization prebuild
+	$(Customization/$(CUSTOMIZATION)/prebuild)
+
 	# Build
 	$(call Build,$(CONFIG))
 
 	# Install
-ifeq ($(BUILD),debug)
-	$(call InstallDebug,$(IMAGES))
-else
 	$(call Install,$(IMAGES),$(TESTED))
-endif
 
 $(OPENWRT_DIR):
 	svn co $(OPENWRT_URL) $@
 
-$(OPENWRT_DIR)/feeds.conf:
-	echo "src-svn packages $(PACKAGES_URL)" > $@
-	echo "src-svn luci $(LUCI_URL)" >> $@
+$(OPENWRT_DIR)/feeds.conf: config.mk
+	# BUG: OpenWrt "feeds update" will update to latest revisions
+	#      (regardless of @ in URL). As a workaround we do a "feeds clean".
+	$(OPENWRT_DIR)/scripts/feeds clean
+	echo "src-svn luci $(LUCI_URL)" > $@
+	echo "src-svn packages $(PACKAGES_URL)" >> $@
 	$(OPENWRT_DIR)/scripts/feeds update
-	$(OPENWRT_DIR)/scripts/feeds install luci
+	$(OPENWRT_DIR)/scripts/feeds uninstall -a
+	$(OPENWRT_DIR)/scripts/feeds install $(CONFIG_LUCI_LIST)
+	$(OPENWRT_DIR)/scripts/feeds install $(CONFIG_PACKAGES_LIST)
 
-.PHONY: all help _info _touch _build _build-products _build-targets _build-images
+.PHONY: all help _check _info _build _build-products _build-targets _build-images

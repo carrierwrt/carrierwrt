@@ -14,6 +14,7 @@ fi
 
 REPOSITORY=$1
 BACKUP=$2
+REVISION=$(svn info $REPOSITORY | grep 'Revision: ' | cut -d' ' -f2)
 
 svn status $REPOSITORY | while read l
 do
@@ -36,6 +37,18 @@ do
 			cp -r $P $BACKUP/$P
 		fi
 		echo "svn revert $P"
+		;;
+	"~")
+		if [ -d "$BACKUP" ]
+		then
+			mkdir -p $BACKUP/$(dirname $P)
+			cp -r $P $BACKUP/$P
+		fi
+		echo "rm -rf $P"
+		echo "svn update -r $REVISION $P"
+		;;
+	"!")
+		echo "svn update -r $REVISION $P"
 		;;
 	*)
 		echo "WARNING: $(basename $0) does not know what to do with $S!" 1>&2

@@ -1,5 +1,5 @@
 
-# (C) 2013 CarrierWrt.org
+# (C) 2013-2014 CarrierWrt.org
 
 #
 # Product profile: router (Consumer Wi-Fi Router)
@@ -33,4 +33,16 @@ define Customization/default
 		ar71xx/openwrt-ar71xx-generic-wndr3700v2-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-wndr3700v2-squashfs-sysupgrade.bin
 
+endef
+
+define Customization/debug
+	$(call Customization/default)
+
+	CONFIG += \
+		CONFIG_BUSYBOX_CONFIG_FEATURE_INIT_COREDUMPS=y
+
+endef
+
+define Customization/debug/prebuild
+	touch $(OPENWRT_DIR)/files/.init_enable_core
 endef
