@@ -1,0 +1,14 @@
+diff -urN hostapd-20131120-before_segvfix/src/ap/ap_list.c hostapd-20131120-after_segvfix/src/ap/ap_list.c
+--- hostapd-20131120-before_segvfix/src/ap/ap_list.c	2014-07-10 01:18:21.444238558 +0200
++++ hostapd-20131120-after_segvfix/src/ap/ap_list.c	2014-07-10 01:22:46.776235763 +0200
+@@ -33,6 +33,10 @@
+ {
+ 	int i;
+ 
++	if (iface == NULL || iface->current_mode == NULL ||
++	    iface->conf == NULL || ap == NULL)
++		return 0;
++
+ 	if (iface->current_mode->mode != HOSTAPD_MODE_IEEE80211G ||
+ 	    iface->conf->channel != ap->channel)
+ 		return 0;
