@@ -39,7 +39,8 @@ define Customization/debug
 	$(call Customization/default)
 
 	CONFIG += \
-		CONFIG_BUSYBOX_CONFIG_FEATURE_INIT_COREDUMPS=y
+		CONFIG_BUSYBOX_CONFIG_FEATURE_INIT_COREDUMPS=y \
+		CONFIG_PACKAGE_ATH_DEBUG=y
 
 endef
 
