@@ -1,0 +1,15 @@
+diff -urN compat-wireless-2014-01-23.1-before_disable_ar9001_intr_mitigation/drivers/net/wireless/ath/ath9k/hw.c compat-wireless-2014-01-23.1-after_disable_ar9001_intr_mitigation/drivers/net/wireless/ath/ath9k/hw.c
+--- compat-wireless-2014-01-23.1-before_disable_ar9001_intr_mitigation/drivers/net/wireless/ath/ath9k/hw.c	2014-07-20 00:23:31.064593442 +0200
++++ compat-wireless-2014-01-23.1-after_disable_ar9001_intr_mitigation/drivers/net/wireless/ath/ath9k/hw.c	2014-07-20 00:33:46.896586883 +0200
+@@ -370,7 +370,10 @@
+ 	ah->config.cwm_ignore_extcca = 0;
+ 	ah->config.analog_shiftreg = 1;
+ 
+-	ah->config.rx_intr_mitigation = true;
++	if (!AR_SREV_9100(ah))
++		ah->config.rx_intr_mitigation = true;
++	else
++		ah->config.rx_intr_mitigation = false;
+ 
+ 	ah->config.rimt_last = 250;
+ 	ah->config.rimt_first = 500;
