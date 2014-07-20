@@ -40,7 +40,8 @@ define Customization/debug
 
 	CONFIG += \
 		CONFIG_BUSYBOX_CONFIG_FEATURE_INIT_COREDUMPS=y \
-		CONFIG_PACKAGE_ATH_DEBUG=y
+		CONFIG_PACKAGE_ATH_DEBUG=y \
+		CONFIG_PACKAGE_hostapd-utils=y
 
 endef
 
