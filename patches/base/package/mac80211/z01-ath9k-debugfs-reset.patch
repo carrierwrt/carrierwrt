@@ -1,0 +1,66 @@
+diff -urN compat-wireless-2014-01-23.1-before_debugfs_reset/drivers/net/wireless/ath/ath9k/debug.c compat-wireless-2014-01-23.1-after_debugfs_reset/drivers/net/wireless/ath/ath9k/debug.c
+--- compat-wireless-2014-01-23.1-before_debugfs_reset/drivers/net/wireless/ath/ath9k/debug.c	2014-07-21 12:25:52.295211074 +0200
++++ compat-wireless-2014-01-23.1-after_debugfs_reset/drivers/net/wireless/ath/ath9k/debug.c	2014-07-21 12:36:44.155204140 +0200
+@@ -872,13 +872,41 @@
+ 	len += scnprintf(buf + len, sizeof(buf) - len,
+ 			 "%17s: %2d\n", "MCI Reset",
+ 			 sc->debug.stats.reset[RESET_TYPE_MCI]);
++	len += scnprintf(buf + len, sizeof(buf) - len,
++			 "%17s: %2d\n", "DebugFS",
++			 sc->debug.stats.reset[RESET_TYPE_DEBUGFS]);
+ 
+-	if (len > sizeof(buf))
+-		len = sizeof(buf);
++	BUG_ON(len > sizeof(buf));
+ 
+ 	return simple_read_from_buffer(user_buf, count, ppos, buf, len);
+ }
+ 
++static ssize_t write_file_reset(struct file *file,
++				const char __user *user_buf,
++				size_t count, loff_t *ppos)
++{
++	struct ath_softc *sc = file->private_data;
++	struct ath_common *common = ath9k_hw_common(sc->sc_ah);
++	unsigned long reset;
++	char buf[32];
++	ssize_t len;
++
++	len = min(count, sizeof(buf) - 1);
++	if (copy_from_user(buf, user_buf, len))
++		return -EFAULT;
++
++	buf[len] = '\0';
++	if (kstrtoul(buf, 0, &reset))
++		return -EINVAL;
++
++	if (reset != 1)
++		return -EINVAL;
++
++	ath9k_queue_reset(sc, RESET_TYPE_DEBUGFS);
++
++	return count;
++}
++
+ void ath_debug_stat_tx(struct ath_softc *sc, struct ath_buf *bf,
+ 		       struct ath_tx_status *ts, struct ath_txq *txq,
+ 		       unsigned int flags)
+@@ -939,6 +967,7 @@
+ 
+ static const struct file_operations fops_reset = {
+ 	.read = read_file_reset,
++	.write = write_file_reset,
+ 	.open = simple_open,
+ 	.owner = THIS_MODULE,
+ 	.llseek = default_llseek,
+diff -urN compat-wireless-2014-01-23.1-before_debugfs_reset/drivers/net/wireless/ath/ath9k/debug.h compat-wireless-2014-01-23.1-after_debugfs_reset/drivers/net/wireless/ath/ath9k/debug.h
+--- compat-wireless-2014-01-23.1-before_debugfs_reset/drivers/net/wireless/ath/ath9k/debug.h	2014-07-21 12:25:52.315211074 +0200
++++ compat-wireless-2014-01-23.1-after_debugfs_reset/drivers/net/wireless/ath/ath9k/debug.h	2014-07-21 12:26:58.351210368 +0200
+@@ -50,6 +50,7 @@
+ 	RESET_TYPE_MAC_HANG,
+ 	RESET_TYPE_BEACON_STUCK,
+ 	RESET_TYPE_MCI,
++	RESET_TYPE_DEBUGFS,
+ 	__RESET_TYPE_MAX
+ };
+ 
