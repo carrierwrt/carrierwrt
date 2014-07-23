@@ -1,0 +1,16 @@
+Index: target/linux/ar71xx/patches-3.3/z00-MIPS-ath79-longer-wdt-timeout.patch
+===================================================================
+--- target/linux/ar71xx/patches-3.3/z00-MIPS-ath79-longer-wdt-timeout.patch	(revision 0)
++++ target/linux/ar71xx/patches-3.3/z00-MIPS-ath79-longer-wdt-timeout.patch	(revision 0)
+@@ -0,0 +1,11 @@
++--- linux-3.3.8-before_increase_ath79_wdt_timeout/drivers/watchdog/ath79_wdt.c	2014-07-23 20:10:26.374037282 +0200
+++++ linux-3.3.8/drivers/watchdog/ath79_wdt.c	2014-07-23 20:11:19.618036716 +0200
++@@ -36,7 +36,7 @@
++ 
++ #define DRIVER_NAME	"ath79-wdt"
++ 
++-#define WDT_TIMEOUT	15	/* seconds */
+++#define WDT_TIMEOUT	30	/* seconds */
++ 
++ #define WDOG_CTRL_LAST_RESET	BIT(31)
++ #define WDOG_CTRL_ACTION_MASK	3

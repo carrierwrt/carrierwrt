@@ -1,0 +1,94 @@
+#!/bin/sh
+
+. /lib/functions.sh
+
+# Health check hooks
+export HEALTHCHECKS=""
+
+run_hooks() {
+	for func in "$@"; do
+		eval "$func" || return 1
+	done
+
+	return 0
+}
+
+usage() {
+	echo ""
+	echo "Usage: watchdog [-t N] [-T N] [-F] [-h] DEV" 1>&2
+	echo ""
+	echo "Periodically write to watchdog device DEV"
+	echo ""
+	echo -e "\t\t -t N\tReset every N seconds (default 30)"
+	echo -e "\t\t -F  \tRun in foreground"
+	echo ""
+}
+
+monitor() {
+	local device="$1"
+	local reset="$2"
+
+	# Load all health checks
+	include /lib/watchdog
+	
+	# Open watchdog device
+	exec 3> $device
+
+	# Release the watchdog device if terminated
+	trap "echo V 1>&3 ; exit" TERM INT
+
+	# Reset watchdog periodically if all health checks pass
+	while true; do
+		if run_hooks $HEALTHCHECKS; then
+			# We live to fight another day
+			echo 1>&3
+		fi
+		# Sleep but awake immediately if there's a signal
+		sleep $reset &
+		wait
+	done
+	
+	# Not reached
+	exit 0
+}
+
+RESET=30
+FG=0
+
+# Parse options
+while getopts T:t:F c
+do
+	case $c in
+		T)
+			echo "Warning: I don't know how to ioctl! -T ignored." 1>&2
+			;;
+		t)
+			RESET=$OPTARG
+			;;
+		F)
+			FG=1
+			;;
+		*)
+			usage
+			exit 1
+	esac
+done
+shift $((OPTIND-1))
+
+DEVICE=$1
+if ! [ -c "$DEVICE" ]; then
+	[ -n "$DEVICE" ] && echo "Error: $DEVICE is not a character device." 1>&2
+	usage
+	exit 1
+fi
+
+if [ "$FG" -ne 1 ]; then
+	# Daemonize
+	cd /tmp
+	exec 0<&- 1>&- 2>&-
+	monitor "$DEVICE" "$RESET" &
+else
+	monitor "$DEVICE" "$RESET"
+fi
+
+exit 0
