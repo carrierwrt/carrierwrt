@@ -1,0 +1,22 @@
+Index: package/netifd/files/lib/netifd/dhcp.script
+===================================================================
+--- package/netifd/files/lib/netifd/dhcp.script	(revision 40431)
++++ package/netifd/files/lib/netifd/dhcp.script	(working copy)
+@@ -80,6 +80,17 @@
+ 	;;
+ esac
+ 
++# TR-069: The string "dslforum.org" in the Vendor Class (Option 60) field
++#         indicates that the client can receive TR-069 configuration through
++#         DHCP Option 43. We use that as a trigger for this functionality,
++#         i.e. if you want TR-069 DHCP Option 43 configuration on an
++#         interface you should set option 'vendorid' to something containing
++#         'dslforum.org' (and probably 'reqopts' to 43 as well).
++if [ -n "$opt43" ] && uci get network.${INTERFACE}.vendorid 2> /dev/null | \
++   grep -q 'dslforum.org'; then \
++        /usr/sbin/easycwmp43cfg "$opt43"
++fi
++
+ # user rules
+ [ -f /etc/udhcpc.user ] && . /etc/udhcpc.user
+ 

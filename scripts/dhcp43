@@ -1,0 +1,53 @@
+#!/bin/sh
+#
+# Utility script to generate DHCP Option 43
+
+VID=$1
+VAL=$2
+
+if [ -z "$VID" -o -z "$VAL" ]; then
+	echo "Usage: dhcp43 <vendor> <value>"
+	echo ""
+	echo "    vendor     Vendor-Class DHCP Option 60"
+	echo "    value      Value to encode"
+	echo ""
+
+	exit 1
+fi
+
+OPT=""
+
+case "$VID" in
+	*dslforum.org*)
+		code=0x01
+		len=$(echo -n $VAL | wc -c)
+		hex=$(echo -n $VAL | hexdump -v -e '/1 "%02X"')
+
+		OPT=$(printf "0x%02X%02X%s\n" $code $len $hex)
+		;;
+esac
+
+if [ -z "$OPT" ]; then
+	echo "Don't know how to encode that unfortunately."
+	exit 1
+fi
+
+cat << EOF
+Configure your DHCP server to:
+
+  1) Look for requests with Vendor-Class containing '$VID'.
+
+  2) Reply with Option 43 containing '$OPT'.
+
+Detailed instructions for specific DHCP servers:
+
+  === Mikrotik ===
+
+  In the CLI write (where X is the network index):
+
+    /ip dhcp-server option add code=43 name=opt43 value=$OPT"
+    /ip dhcp-server network set X dhcp-option=opt43"
+
+EOF
+
+exit 0

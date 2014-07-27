@@ -1,0 +1,48 @@
+diff -urN busybox-1.19.4-before_udhcp_reqopts_fix/networking/udhcp/dhcpc.c busybox-1.19.4-after_udhcp_reqopts_fix/networking/udhcp/dhcpc.c
+--- busybox-1.19.4-before_udhcp_reqopts_fix/networking/udhcp/dhcpc.c	2014-06-30 21:49:53.799391574 +0200
++++ busybox-1.19.4-after_udhcp_reqopts_fix/networking/udhcp/dhcpc.c	2014-06-30 21:59:36.947385359 +0200
+@@ -612,13 +612,9 @@
+ 	 * No bounds checking because it goes towards the head of the packet. */
+ 	end = udhcp_end_option(packet->options);
+ 	len = 0;
+-	for (i = 0; (c = dhcp_optflags[i].code) != 0; i++) {
+-		if ((   (dhcp_optflags[i].flags & OPTION_REQ)
+-		     && !client_config.no_default_options
+-		    )
+-		 || (client_config.opt_mask[c >> 3] & (1 << (c & 7)))
+-		) {
+-			packet->options[end + OPT_DATA + len] = c;
++	for (i = 1; i <= 254; i++) {
++		if (client_config.opt_mask[i >> 3] & (1 << (i & 7))) {
++			packet->options[end + OPT_DATA + len] = i;
+ 			len++;
+ 		}
+ 	}
+@@ -1301,8 +1297,14 @@
+ 		SERVER_PORT = CLIENT_PORT - 1;
+ 	}
+ #endif
+-	if (opt & OPT_o)
+-		client_config.no_default_options = 1;
++	if (!(opt & OPT_o)) {
++		unsigned i, n;
++		for (i = 0; (n = dhcp_optflags[i].code) != 0; i++) {
++			if (dhcp_optflags[i].flags & OPTION_REQ) {
++				client_config.opt_mask[n >> 3] |= 1 << (n & 7);
++			}
++		}
++	}
+ 	while (list_O) {
+ 		char *optstr = llist_pop(&list_O);
+ 		unsigned n = bb_strtou(optstr, NULL, 0);
+diff -urN busybox-1.19.4-before_udhcp_reqopts_fix/networking/udhcp/dhcpc.h busybox-1.19.4-after_udhcp_reqopts_fix/networking/udhcp/dhcpc.h
+--- busybox-1.19.4-before_udhcp_reqopts_fix/networking/udhcp/dhcpc.h	2014-06-30 21:49:53.799391574 +0200
++++ busybox-1.19.4-after_udhcp_reqopts_fix/networking/udhcp/dhcpc.h	2014-06-30 21:51:29.663390551 +0200
+@@ -9,7 +9,6 @@
+ 
+ struct client_config_t {
+ 	uint8_t client_mac[6];          /* Our mac address */
+-	char no_default_options;        /* Do not include default options in request */
+ 	IF_FEATURE_UDHCP_PORT(uint16_t port;)
+ 	int ifindex;                    /* Index number of the interface to use */
+ 	uint8_t opt_mask[256 / 8];      /* Bitmask of options to send (-O option) */

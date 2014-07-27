@@ -1,0 +1,95 @@
+#!/bin/sh
+#
+# Configure and start easycwmp based on contents of DHCP Option 43.
+#
+
+# __parse_uci - Generate a string of format "[scheme]:[hostname]:[port]:[path]"
+#               from current UCI settings.
+__parse_uci() {
+	local scheme="$(uci get easycwmp.@acs[0].scheme)"
+	local hostname="$(uci get easycwmp.@acs[0].hostname)"
+	local port="$(uci get easycwmp.@acs[0].port)"
+	local path="$(uci get easycwmp.@acs[0].path)"
+
+	echo "${scheme}:${hostname}:${port}:${path}"
+}
+
+# __parse_url - Generate a string of format "[scheme]:[hostname]:[port]:[path]"
+#               from a URL. Also normalizes port and path.
+__parse_url() {
+	echo $1 | sed \
+		-e 's|^\(http\|https\)://\([^/:]\+\):\?\([0-9]\+\)\?\(.*\)$|\1:\2:\3:\4|' \
+		-e 's|^http:\([^:]*\)::\([^:]*\)$|http:\1:7547:\2|' \
+		-e 's|^https:\([^:]*\)::\([^:]*\)$|https:\1:7548:\2|' \
+		-e 's|^\([^:]*\):\([^:]*\):\([^:]*\):$|\1:\2:\3:/|'
+}
+
+# VOID -> VOID
+__set_acs() {
+	local scheme="$(echo $1 | cut -d: -f1)"
+	local hostname="$(echo $1 | cut -d: -f2)"
+	local port="$(echo $1 | cut -d: -f3)"
+	local path="$(echo $1 | cut -d: -f4)"
+	
+	uci set easycwmp.@acs[0].scheme="$scheme"
+	uci set easycwmp.@acs[0].hostname="$hostname"
+	uci set easycwmp.@acs[0].port="$port"
+	uci set easycwmp.@acs[0].path="$path"
+	uci set easycwmp.@acs[0].username=""
+	uci set easycwmp.@acs[0].password=""
+	uci commit easycwmp
+	
+	/etc/init.d/easycwmpd restart
+}
+
+opt43="$1"
+
+if echo "$opt43" | cut -c 1-2 | xargs test "0x" = ; then
+	opt43=$(echo $opt43 | cut -c3-)	
+fi
+
+if [ $# -eq 1 ] && echo "$opt43" | grep -q '^[0-9a-zA-Z]\+$'; then
+	# This could conseivably be an Option 43 value in hex:
+	
+	if echo "$opt43" | cut -c 1-2 | xargs test "01" = ; then
+		# This could be Option 43 subcode 1 = TR-069 ACS URL:
+		
+  		len=$(echo "$opt43" | cut -c3-4 | sed -e 's/\([0-9A-Fa-f][0-9A-Fa-f]\)/0x\1  /g' | awk '{printf "%d", $1}')
+		url=$(echo "$opt43" | cut -c5-  | sed -e 's/\([0-9A-Fa-f][0-9A-Fa-f]\)/0x\1\n/g' | awk '{printf "%c", $1}')
+	
+		if [ $len -eq ${#url} ]; then
+			# This probably is Option 43 subcode 1 TR-069 ACS:
+			cur=$(__parse_uci)
+			new=$(__parse_url $url)
+		
+			[ "$new" != "$cur" ] && __set_acs $new
+		else
+			echo "Parse error" 1>&2
+			exit 3
+		fi
+	else
+		echo "Parse error" 1>&2
+		exit 2
+	fi
+	# TODO: Option 43 subcode 2 TR-069 Provisioning Code.
+else
+	cat << EOF
+This is a utility meant to be run e.g. from /etc/udhcpc.user to configure
+easycwmp based on the contents of DHCP Option 43.
+
+Usage: easycwmp43cfg <option43value>
+
+    value   Value of DHCP Option 43 in hexadecimal
+    
+Example:
+
+  # Configure easycwmp to use the ACS at 'https://acs:1234/with/path':
+  easycwmp43cfg 011A68747470733A2F2F6163733A313233342F776974682F70617468
+  
+Use http://github.com/carrierwrt/carrierwrt/scripts/dhcp43 to generate
+your own DHCP Option 43 values.
+EOF
+	exit 1
+fi
+
+exit 0
