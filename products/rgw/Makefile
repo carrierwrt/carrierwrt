@@ -10,7 +10,8 @@ define Product/rgw
 	CONFIG += \
 		CONFIG_BUSYBOX_CONFIG_TELNETD=n \
 		CONFIG_PACKAGE_luci=y \
-		CONFIG_PACKAGE_anyfi-mac=y
+		CONFIG_PACKAGE_anyfi-mac=y \
+		CONFIG_PACKAGE_easycwmp=y
 			
 endef
 
