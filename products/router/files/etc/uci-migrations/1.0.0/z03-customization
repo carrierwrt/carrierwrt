@@ -12,6 +12,11 @@ if [ "$UCI_MIGRATION_ACTION" == "RESET" ]; then
 	# Set up wireless as open network per default
 	uci delete wireless.radio0.disabled
 	uci set wireless.@wifi-iface[0].ssid="$(cat $PERSIST/SSID)"
+	# If there happens to be a factory default KEY we use it
+	if [ -f $PERSIST/KEY ]; then
+		uci set wireless.@wifi-iface[0].encryption=psk-mixed
+		uci set wireless.@wifi-iface[0].key="$(cat $PERSIST/KEY)"
+	fi
 	uci commit wireless
 
 	# Set bootstrap as theme in luci

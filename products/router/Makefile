@@ -48,3 +48,19 @@ endef
 define Customization/debug/prebuild
 	touch $(OPENWRT_DIR)/files/.init_enable_core
 endef
+
+define Customization/managed
+	$(call Customization/default)
+
+	CONFIG += \
+		CONFIG_PACKAGE_easycwmp=y
+
+	TR69_MIGR_DIR := $(OPENWRT_DIR)/files/etc/uci-migrations/1.1.3-6
+endef
+
+define Customization/managed/prebuild
+	mkdir -p $(TR69_MIGR_DIR)
+	cp common/uci-migrations/tr69/set-fixed-acs.sh $(TR69_MIGR_DIR)/01-tr69-set-fixed-acs.sh
+	cp common/uci-migrations/tr69/open-firewall.sh $(TR69_MIGR_DIR)/02-tr69-open-firewall.sh
+	cp common/uci-migrations/tr69/fixup-wan-if.sh  $(TR69_MIGR_DIR)/03-tr69-fixup-wan-if.sh
+endef
