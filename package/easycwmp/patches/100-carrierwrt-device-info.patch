@@ -1,0 +1,35 @@
+diff --git a/ext/openwrt/scripts/functions/common.sh b/ext/openwrt/scripts/functions/common.sh
+index 824f626..f0d80cc 100755
+--- a/ext/openwrt/scripts/functions/common.sh
++++ b/ext/openwrt/scripts/functions/common.sh
+@@ -368,7 +368,7 @@ easycwmp_get_inform_deviceid()
+ 	
+ 	json_add_string "manufacturer" "`cat /tmp/sysinfo/model | cut -d' ' -f1`"
+     json_add_string "oui" "`uci get wireless.radio0.macaddr | tr 'a-f' 'A-F' | tr -d ':' | cut -c 1-6`"
+-    json_add_string "product_class" "`cat /tmp/sysinfo/board_name`"
++    json_add_string "product_class" "`tr '[a-z]' '[A-Z]' < /etc/carrierwrt_product`"
+     json_add_string "serial_number" "`uci get wireless.radio0.macaddr | tr 'a-f' 'A-F' | tr -d ':'`"
+     
+ 	json_close_object
+diff --git a/ext/openwrt/scripts/functions/device_info b/ext/openwrt/scripts/functions/device_info.sh
+index 602a112..836cae1 100755
+--- a/ext/openwrt/scripts/functions/device_info.sh
++++ b/ext/openwrt/scripts/functions/device_info.sh
+@@ -104,7 +104,7 @@ local param="InternetGatewayDevice.DeviceInfo.ProductClass"
+ local permissions="0"
+ case "$action" in
+ 	get_value)
+-	val=`cat /tmp/sysinfo/board_name`
++	val=`tr '[a-z]' '[A-Z]' < /etc/carrierwrt_product`
+ 	;;
+ 	get_name)
+ 	[ "$nl" = "1" ] && return $E_INVALID_ARGUMENTS
+@@ -164,7 +164,7 @@ local param="InternetGatewayDevice.DeviceInfo.SoftwareVersion"
+ local permissions="0"
+ case "$action" in
+ 	get_value)
+-	val="openwrt-`cat /etc/openwrt_version`"
++	val="carrierwrt-`cat /etc/carrierwrt_version`"
+ 	;;
+ 	get_name)
+ 	[ "$nl" = "1" ] && return $E_INVALID_ARGUMENTS

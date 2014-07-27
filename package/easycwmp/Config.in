@@ -1,0 +1,26 @@
+if PACKAGE_easycwmp
+
+config EASYCWMP_SCRIPTS_FULL
+	bool "Install all easycwmp scripts"
+	default y
+
+choice
+	prompt "Select ACS sever"
+	default EASYCWMP_ACS_MULTI
+
+config EASYCWMP_ACS_MULTI
+	bool "No specific ACS, follow standard"
+
+config EASYCWMP_ACS_HDM
+	bool "HDM"
+endchoice
+
+config EASYCWMP_DEBUG
+	bool "Compile with debug options"
+	default n
+
+config EASYCWMP_DEVEL
+	bool "Compile with development options"
+	default n
+
+endif

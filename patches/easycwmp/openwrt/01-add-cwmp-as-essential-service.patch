@@ -1,0 +1,13 @@
+Index: package/base-files/files/lib/upgrade/common.sh
+===================================================================
+--- package/base-files/files/lib/upgrade/common.sh	(revision 40431)
++++ package/base-files/files/lib/upgrade/common.sh	(working copy)
+@@ -99,7 +99,7 @@
+ 
+ 		case "$name" in
+ 			# Skip essential services
+-			*ash*|*init*|*watchdog*|*ssh*|*dropbear*|*telnet*|*login*|*hostapd*|*wpa_supplicant*) : ;;
++			*ash*|*init*|*watchdog*|*ssh*|*dropbear*|*telnet*|*login*|*hostapd*|*wpa_supplicant*|*cwmp*) : ;;
+ 
+ 			# Killable process
+ 			*)
