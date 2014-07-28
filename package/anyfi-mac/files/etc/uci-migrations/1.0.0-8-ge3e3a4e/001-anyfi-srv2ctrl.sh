@@ -21,7 +21,8 @@ for DEV in $DEVICES; do
 
 	if [ -z "$ctrl" ]; then
 		# No anyfi_server in old model used to mean disable:
-		uci set wireless.$DEV.anyfi_disabled=1
+		[ "$UCI_MIGRATION_ACTION" == "UPGRADE" ] && \
+			uci set wireless.$DEV.anyfi_disabled=1
 	else
 		if [ -z "$CONTROLLER" ]; then
 			CONTROLLER="$ctrl"
@@ -42,7 +43,8 @@ for VIF in $IFACES; do
 
 	if [ -z "$ctrl" ]; then
 		# No anyfi_server in old model used to mean disabled:
-		uci set wireless.$VIF.anyfi_disabled=1
+		[ "$UCI_MIGRATION_ACTION" == "UPGRADE" ] && \
+			uci set wireless.$VIF.anyfi_disabled=1
 	else
 		if [ -z "$CONTROLLER" ]; then
 			CONTROLLER="$ctrl"
