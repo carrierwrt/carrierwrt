@@ -24,6 +24,17 @@ FWSUBDIR     	:= $(subst default,,$(CUSTOMIZATION))
 # Required packages
 CONFIG += CONFIG_PACKAGE_factory-defaults=y
 
+# Copy/override OpenWrt packages with CarrierWrt ditto
+# InstallPackages
+define InstallPackages
+	for package in package/*; do \
+		if [ -d $(OPENWRT_DIR)/$$package ]; then \
+			rm -rf $(OPENWRT_DIR)/$$package; \
+		fi; \
+		cp -r $$package $(OPENWRT_DIR)/$$package; \
+	done
+endef
+
 # WriteConfig <line>
 define WriteConfig
 	echo $(1) >> $(OPENWRT_DIR)/.config
@@ -211,13 +222,8 @@ _build-images:
 	# The special 'files' dir is in svn:ignore so we need to manually delete it
 	rm -rf $(OPENWRT_DIR)/files/*
 
-	# Symlink all packages into OpenWrt
-	for package in package/*; do \
-		if [ -d $(OPENWRT_DIR)/$$package ]; then \
-			rm -rf $(OPENWRT_DIR)/$$package; \
-		fi; \
-		ln -fs ../../$$package $(OPENWRT_DIR)/$$package; \
-	done
+	# Install packages
+	$(call InstallPackages)
 
 	# Load Product
 	$(eval $(Product/$(PRODUCT)))
@@ -270,9 +276,16 @@ $(OPENWRT_DIR):
 	svn co $(OPENWRT_URL) $@
 
 $(OPENWRT_DIR)/feeds.conf: config.mk
+	# NOTE: OpenWrt "feeds install" will resolve package dependencies and
+	#       install other packages as well. To make sure those dependencies
+	#       are primarily resolved against CarrierWrt packages we need to
+	#       install them here.
+	$(call InstallPackages)
+
 	# BUG: OpenWrt "feeds update" will update to latest revisions
 	#      (regardless of @ in URL). As a workaround we do a "feeds clean".
 	$(OPENWRT_DIR)/scripts/feeds clean
+
 	echo "src-svn luci $(LUCI_URL)" > $@
 	echo "src-svn packages $(PACKAGES_URL)" >> $@
 	$(OPENWRT_DIR)/scripts/feeds update
