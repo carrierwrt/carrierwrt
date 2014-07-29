@@ -1,0 +1,481 @@
+diff --git a/ext/openwrt/scripts/functions/device_info.sh b/ext/openwrt/scripts/functions/device_info.sh
+index dffd596..8c76295 100644
+--- a/ext/openwrt/scripts/functions/device_info.sh
++++ b/ext/openwrt/scripts/functions/device_info.sh
+@@ -217,6 +217,26 @@ easycwmp_output "$param" "$val" "$permissions"
+ return 0
+ }
+ 
++get_device_info_x_anyfi_net_version() {
++local nl="$1"
++local val=""
++local param="InternetGatewayDevice.DeviceInfo.X_ANYFI_NET_Version"
++local permissions="0"
++case "$action" in
++	get_value)
++	val="`anyfid --version`"
++	;;
++	get_name)
++	[ "$nl" = "1" ] && return $E_INVALID_ARGUMENTS
++	;;
++	get_notification)
++	easycwmp_get_parameter_notification "val" "$param"
++	;;
++esac
++easycwmp_output "$param" "$val" "$permissions"
++return 0
++}
++
+ get_device_info_object() {
+ nl="$1"
+ case "$action" in
+@@ -240,6 +260,7 @@ case "$1" in
+ 	get_device_info_device_log "$2"
+ 	get_device_info_specversion "$2"
+ 	get_device_info_provisioningcode "$2"
++	get_device_info_x_anyfi_net_version "$2"
+ 	return 0
+ 	;;
+ 	InternetGatewayDevice.DeviceInfo.)
+@@ -254,6 +275,7 @@ case "$1" in
+ 	get_device_info_device_log 0
+ 	get_device_info_specversion 0
+ 	get_device_info_provisioningcode 0
++	get_device_info_x_anyfi_net_version 0
+ 	return 0
+ 	;;
+ 	InternetGatewayDevice.DeviceInfo.SpecVersion)
+@@ -296,6 +318,10 @@ case "$1" in
+ 	get_device_info_device_log "$2"
+ 	return $?
+ 	;;
++	InternetGatewayDevice.DeviceInfo.X_ANYFI_NET_Version)
++	get_device_info_x_anyfi_net_version "$2"
++	return $?
++	;;
+ esac
+ return $E_INVALID_PARAMETER_NAME
+ }
+diff --git a/ext/openwrt/scripts/functions/lan_device.sh b/ext/openwrt/scripts/functions/lan_device.sh
+index 2926d37..c770028 100644
+--- a/ext/openwrt/scripts/functions/lan_device.sh
++++ b/ext/openwrt/scripts/functions/lan_device.sh
+@@ -28,6 +28,29 @@ easycwmp_output "$parm" "$val" "$permissions" "$type"
+ return 0
+ }
+ 
++get_wlan_anyfi_enable() {
++local parm="InternetGatewayDevice.LANDevice.1.WLANConfiguration.$1.X_ANYFI_NET_Service.Enable"
++local uci_iface="$2"
++local nl="$3"
++local type="xsd:boolean"
++local val=""
++local permissions="1"
++case "$action" in
++	get_value)
++	val=`$UCI_GET wireless.${uci_iface}.anyfi_disabled 2> /dev/null`
++	[ "$val" = "1" ] && val="false" || val="true"
++	;;
++	get_name)
++	[ "$nl" = "1" ] && return $E_INVALID_ARGUMENTS
++	;;
++	get_notification)
++	easycwmp_get_parameter_notification "val" "$parm"
++	;;
++esac
++easycwmp_output "$parm" "$val" "$permissions" "$type"
++return 0
++}
++
+ get_wlan_enable_all() {
+ 	local nl="$1"
+ 	local iface
+@@ -38,6 +61,16 @@ get_wlan_enable_all() {
+ 	done
+ }
+ 
++get_wlan_anyfi_enable_all() {
++	local nl="$1"
++	local iface
++	local ifaces=`$UCI_SHOW wireless| grep "wireless\.@wifi-iface\[[0-9]\+\]\.instance" | cut -d'.' -f2`
++	for iface in $ifaces; do
++		local num=`$UCI_GET wireless.$iface.instance`
++		get_wlan_anyfi_enable "$num" "$iface" "$nl"
++	done
++}
++
+ set_wlan_enable() {
+ local parm="InternetGatewayDevice.LANDevice.1.WLANConfiguration.$1.Enable"
+ local uci_iface="$2"
+@@ -54,6 +87,22 @@ case $action in
+ esac
+ }
+ 
++set_wlan_anyfi_enable() {
++local parm="InternetGatewayDevice.LANDevice.1.WLANConfiguration.$1.X_ANYFI_NET_Service.Enable"
++local uci_iface="$2"
++local val="$3"
++case $action in
++	set_value)
++	[ "$val" = "1" -o "$val" = "true" ] && val="0" || val="1"
++	execute_command_in_apply_service "wifi"
++	$UCI_SET wireless.${uci_iface}.anyfi_disabled="$val"
++	;;
++	set_notification)
++	easycwmp_set_parameter_notification "$parm" "$val"
++	;;
++esac
++}
++
+ get_wlan_ssid() {
+ local parm="InternetGatewayDevice.LANDevice.1.WLANConfiguration.$1.SSID"
+ local uci_iface="$2"
+@@ -131,6 +180,16 @@ get_wlan_configuration_instances() {
+ 	done
+ } 
+ 
++get_wlan_configuration_anyfi_service_objects() {
++	local nl="$1"
++	[ "$action" != "get_name" -o "$nl" = "1" ] && return
++	local num
++	local instances=`$UCI_SHOW wireless| grep "wireless\.@wifi-iface\[[0-9]\+\]\.instance" | cut -d'=' -f2`
++	for num in $instances; do
++		easycwmp_output "InternetGatewayDevice.LANDevice.1.WLANConfiguration.$num.X_ANYFI_NET_Service." "" "0"
++	done
++} 
++
+ get_wlan_num_and_uci_iface() {
+ 	local parm="$1"
+ 	local parm_check="$2"
+@@ -164,6 +223,52 @@ case "$action" in
+ esac
+ }
+ 
++get_lan_device_anyfi_radio_object() {
++nl="$1"
++case "$action" in
++	get_name)
++	[ "$nl" = "0" ] && easycwmp_output "InternetGatewayDevice.LANDevice.1.X_ANYFI_NET_Radio." "" "0"
++	;;
++esac
++}
++
++get_lan_device_anyfi_radio_enable() {
++local parm="InternetGatewayDevice.LANDevice.1.X_ANYFI_NET_Radio.Enable"
++local nl="$1"
++local type="xsd:boolean"
++local val=""
++local permissions="1"
++case "$action" in
++	get_value)
++	val=`$UCI_GET wireless.radio0.anyfi_disabled 2> /dev/null`
++	[ "$val" = "1" ] && val="false" || val="true"
++	;;
++	get_name)
++	[ "$nl" = "1" ] && return $E_INVALID_ARGUMENTS
++	;;
++	get_notification)
++	easycwmp_get_parameter_notification "val" "$parm"
++	;;
++esac
++easycwmp_output "$parm" "$val" "$permissions" "$type"
++return 0
++}
++
++set_lan_device_anyfi_radio_enable() {
++local parm="InternetGatewayDevice.LANDevice.1.X_ANYFI_NET_Radio.Enable"
++local val="$2"
++case $action in
++	set_value)
++	[ "$val" = "1" -o "$val" = "true" ] && val="0" || val="1"
++	execute_command_in_apply_service "wifi"
++	$UCI_SET wireless.radio0.anyfi_disabled="$val"
++	;;
++	set_notification)
++	easycwmp_set_parameter_notification "$parm" "$val"
++	;;
++esac
++}
++
+ get_lan_device_wlan_configuration_object() {
+ nl="$1"
+ case "$action" in
+@@ -183,13 +288,27 @@ case "$action" in
+ esac
+ }
+ 
++get_lan_device_wlan_configuration_anyfi_service_object() {
++param="$1"
++nl="$2"
++case "$action" in
++	get_name)
++	[ "$nl" = "0" ] && easycwmp_output "$param" "" "0"
++	;;
++esac
++}
++
+ get_lan_device() {
+ case "$1" in
+ 	InternetGatewayDevice.)
+ 	get_lan_device_object 0
+ 	get_lan_device_instance "$2"
++	get_lan_device_anyfi_radio_object "$2"
++	get_lan_device_anyfi_radio_enable "$2"
+ 	get_lan_device_wlan_configuration_object "$2"
+ 	get_wlan_configuration_instances "$2"
++	get_wlan_configuration_anyfi_service_objects "$2"
++	get_wlan_anyfi_enable_all "$2"
+ 	get_wlan_enable_all "$2"
+ 	get_wlan_ssid_all "$2"
+ 	return 0
+@@ -197,23 +316,40 @@ case "$1" in
+ 	InternetGatewayDevice.LANDevice.)
+ 	get_lan_device_object "$2"
+ 	get_lan_device_instance 0
++	get_lan_device_anyfi_radio_object "$2"
++	get_lan_device_anyfi_radio_enable "$2"
+ 	get_lan_device_wlan_configuration_object "$2"
+ 	get_wlan_configuration_instances "$2"
++	get_wlan_configuration_anyfi_service_objects "$2"
++	get_wlan_anyfi_enable_all "$2"
+ 	get_wlan_enable_all "$2"
+ 	get_wlan_ssid_all "$2"
+ 	return 0
+ 	;;
+ 	InternetGatewayDevice.LANDevice.1.)
+ 	get_lan_device_instance "$2"
++	get_lan_device_anyfi_radio_object "$2"
++	get_lan_device_anyfi_radio_enable "$2"
+ 	get_lan_device_wlan_configuration_object 0
+ 	get_wlan_configuration_instances "$2"
++	get_wlan_configuration_anyfi_service_objects "$2"
++	get_wlan_anyfi_enable_all "$2"
+ 	get_wlan_enable_all "$2"
+ 	get_wlan_ssid_all "$2"
+ 	return 0
+ 	;;
++	InternetGatewayDevice.LANDevice.1.X_ANYFI_NET_Radio.)
++	get_lan_device_anyfi_radio_object "$2"
++	get_lan_device_anyfi_radio_enable "$2"
++	;;
++	InternetGatewayDevice.LANDevice.1.X_ANYFI_NET_Radio.Enable)
++	get_lan_device_anyfi_radio_enable "$2"
++	;;
+ 	InternetGatewayDevice.LANDevice.1.WLANConfiguration.)
+ 	get_lan_device_wlan_configuration_object "$2"
+ 	get_wlan_configuration_instances 0
++	get_wlan_configuration_anyfi_service_objects 0
++	get_wlan_anyfi_enable_all "$2"
+ 	get_wlan_enable_all "$2"
+ 	get_wlan_ssid_all "$2"
+ 	return 0
+@@ -236,8 +372,23 @@ case "$1" in
+ 	get_lan_device_wlan_configuration_instance "$1" "$2"
+ 	get_wlan_enable "$num" "$uci_iface" 0
+ 	get_wlan_ssid "$num" "$uci_iface" 0
++	get_lan_device_wlan_configuration_anyfi_service_object "$1.X_ANYFI_NET_Service." "$2"
++	get_wlan_anyfi_enable "$num" "$uci_iface" 0
++	return 0
++	;;
++	InternetGatewayDevice.LANDevice.1.WLANConfiguration.[0-9].X_ANYFI_NET_Service.)
++	get_wlan_num_and_uci_iface "$1" "InternetGatewayDevice.LANDevice.1.WLANConfiguration.{i}.X_ANYFI_NET_Service." num uci_iface
++	[ "$uci_iface" = "" -o "$num" = "" ] && return $E_INVALID_PARAMETER_NAME
++	get_lan_device_wlan_configuration_anyfi_service_object "$1.X_ANYFI_NET_Service." "$2"
++	get_wlan_anyfi_enable "$num" "$uci_iface" 0
+ 	return 0
+ 	;;
++	InternetGatewayDevice.LANDevice.1.WLANConfiguration.[0-9].X_ANYFI_NET_Service.Enable)
++	get_wlan_num_and_uci_iface "$1" "InternetGatewayDevice.LANDevice.1.WLANConfiguration.{i}.X_ANYFI_NET_Service.Enable" num uci_iface
++	[ "$uci_iface" = "" -o "$num" = "" ] && return $E_INVALID_PARAMETER_NAME
++	get_wlan_anyfi_enable "$num" "$uci_iface" "$2"
++	return $?
++	;;
+ esac
+ return $E_INVALID_PARAMETER_NAME
+ }
+@@ -247,12 +398,18 @@ local num uci_iface
+ case "$1" in
+ 	InternetGatewayDevice.LANDevice.|\
+ 	InternetGatewayDevice.LANDevice.1.|\
++	InternetGatewayDevice.LANDevice.1.X_ANYFI_NET_Radio.|\
+ 	InternetGatewayDevice.LANDevice.1.WLANConfiguration.|\
+-	InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.)
++	InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.|\
++	InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.X_ANYFI_NET_Service.)
+ 	[ "$action" = "set_value" ] && return $E_INVALID_PARAMETER_NAME
+ 	easycwmp_set_parameter_notification "$1" "$2"
+ 	return 0
+ 	;;
++	InternetGatewayDevice.LANDevice.1.X_ANYFI_NET_Radio.Enable)
++	set_lan_device_anyfi_radio_enable "$1" "$2"
++	return 0
++	;;
+ 	InternetGatewayDevice.LANDevice.1.WLANConfiguration.[0-9].Enable)
+ 	get_wlan_num_and_uci_iface "$1" "InternetGatewayDevice.LANDevice.1.WLANConfiguration.{i}.Enable" num uci_iface
+ 	[ "$uci_iface" = "" -o "$num" = "" ] && return $E_INVALID_PARAMETER_NAME
+@@ -272,6 +429,19 @@ case "$1" in
+ 	easycwmp_set_parameter_notification "$1" "$2"
+ 	return 0
+ 	;;
++	InternetGatewayDevice.LANDevice.1.WLANConfiguration.[0-9].X_ANYFI_NET_Service.)
++	[ "$action" = "set_value" ] && return $E_INVALID_PARAMETER_NAME
++	get_wlan_num_and_uci_iface "$1" "InternetGatewayDevice.LANDevice.1.WLANConfiguration.{i}.X_ANYFI_NET_Service." num uci_iface
++	[ "$uci_iface" = "" -o "$num" = "" ] && return $E_INVALID_PARAMETER_NAME
++	easycwmp_set_parameter_notification "$1" "$2"
++	return 0
++	;;
++	InternetGatewayDevice.LANDevice.1.WLANConfiguration.[0-9].X_ANYFI_NET_Service.Enable)
++	get_wlan_num_and_uci_iface "$1" "InternetGatewayDevice.LANDevice.1.WLANConfiguration.{i}.X_ANYFI_NET_Service.Enable" num uci_iface
++	[ "$uci_iface" = "" -o "$num" = "" ] && return $E_INVALID_PARAMETER_NAME
++	set_wlan_anyfi_enable "$num" "$uci_iface" "$2"
++	return 0
++	;;
+ esac
+ return $E_INVALID_PARAMETER_NAME
+ }
+diff --git a/ext/openwrt/scripts/functions/x_anyfi_net_config.sh b/ext/openwrt/scripts/functions/x_anyfi_net_config.sh
+new file mode 100644
+index 0000000..718a363
+--- /dev/null
++++ b/ext/openwrt/scripts/functions/x_anyfi_net_config.sh
+@@ -0,0 +1,140 @@
++#!/bin/sh
++
++get_x_anyfi_net_config_controller() {
++local nl="$1"
++local val=""
++local permissions="1"
++local parm="InternetGatewayDevice.X_ANYFI_NET_Config.Controller"
++case "$action" in
++	get_value)
++	val=`$UCI_GET anyfi.controller.hostname 2> /dev/null`
++	;;
++	get_name)
++	[ "$nl" = "1" ] && return $E_INVALID_ARGUMENTS
++	;;
++	get_notification)
++	easycwmp_get_parameter_notification "val" "$parm"
++	;;
++esac
++easycwmp_output "$parm" "$val" "$permissions"
++return 0
++}
++
++set_x_anyfi_net_config_controller() {
++local val=$1
++local parm="InternetGatewayDevice.X_ANYFI_NET_Config.Controller"
++case "$action" in
++	set_value)
++	$UCI_SET anyfi.controller.hostname="$val"
++	execute_command_in_apply_service "wifi"
++	;;
++	set_notification)
++	easycwmp_set_parameter_notification "$parm" "$val"
++	;;
++esac
++}
++
++get_x_anyfi_net_config_optimizer_key() {
++local nl="$1"
++local val=""
++local permissions="1"
++local parm="InternetGatewayDevice.X_ANYFI_NET_Config.OptimizerKey"
++case "$action" in
++	get_value)
++	val=`$UCI_GET anyfi.optimizer.key 2> /dev/null`
++	;;
++	get_name)
++	[ "$nl" = "1" ] && return $E_INVALID_ARGUMENTS
++	;;
++	get_notification)
++	easycwmp_get_parameter_notification "val" "$parm"
++	;;
++esac
++easycwmp_output "$parm" "$val" "$permissions"
++return 0
++}
++
++set_x_anyfi_net_config_optimizer_key() {
++local val=$1
++local parm="InternetGatewayDevice.X_ANYFI_NET_Config.OptimizerKey"
++case "$action" in
++	set_value)
++	$UCI_SET anyfi.optimizer.key="$val"
++	execute_command_in_apply_service "wifi"
++	;;
++	set_notification)
++	easycwmp_set_parameter_notification "$parm" "$val"
++	;;
++esac
++}
++
++get_x_anyfi_net_config_object() {
++nl="$1"
++case "$action" in
++	get_name)
++	[ "$nl" = "0" ] && easycwmp_output "InternetGatewayDevice.X_ANYFI_NET_Config." "" "0"
++	;;
++esac
++}
++
++
++get_x_anyfi_net_config_object() {
++nl="$1"
++case "$action" in
++	get_name)
++	[ "$nl" = "0" ] && easycwmp_output "InternetGatewayDevice.X_ANYFI_NET_Config." "" "0"
++	;;
++esac
++}
++
++get_x_anyfi_net_config() {
++case "$1" in
++	InternetGatewayDevice.)
++	get_x_anyfi_net_config_object 0
++	get_x_anyfi_net_config_controller "$2"
++	get_x_anyfi_net_config_optimizer_key "$2"
++	return 0
++	;;
++	InternetGatewayDevice.X_ANYFI_NET_Config.)
++	get_x_anyfi_net_config_object "$2"
++	get_x_anyfi_net_config_controller 0
++	get_x_anyfi_net_config_optimizer_key 0
++	return 0
++	;;
++	InternetGatewayDevice.X_ANYFI_NET_Config.Controller)
++	get_x_anyfi_net_config_controller "$2"
++	return $?
++	;;
++	InternetGatewayDevice.X_ANYFI_NET_Config.OptimizerKey)
++	get_x_anyfi_net_config_optimizer_key "$2"
++	return $?
++	;;
++esac
++return $E_INVALID_PARAMETER_NAME
++}
++
++set_x_anyfi_net_config() {
++case "$1" in
++	InternetGatewayDevice.|\
++	InternetGatewayDevice.X_ANYFI_NET_Config.)
++	[ "$action" = "set_notification" ] && return $E_NOTIFICATION_REJECTED
++	;;
++	InternetGatewayDevice.X_ANYFI_NET_Config.Controller)
++	set_x_anyfi_net_config_controller "$2"
++	return 0
++	;;
++	InternetGatewayDevice.X_ANYFI_NET_Config.OptimizerKey)
++	set_x_anyfi_net_config_optimizer_key "$2"
++	return 0
++	;;
++esac
++return $E_INVALID_PARAMETER_NAME
++}
++
++build_instances_x_anyfi_net_config() { return 0; }
++
++add_object_x_anyfi_net_config() { return $E_INVALID_PARAMETER_NAME; }
++
++delete_object_x_anyfi_net_config() { return $E_INVALID_PARAMETER_NAME; }
++
++register_function x_anyfi_net_config
