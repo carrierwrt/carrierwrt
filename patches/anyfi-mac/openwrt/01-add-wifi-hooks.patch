@@ -1,6 +1,6 @@
 Index: package/base-files/files/sbin/wifi
 ===================================================================
---- package/base-files/files/sbin/wifi	(revision 36422)
+--- package/base-files/files/sbin/wifi	(revision 40431)
 +++ package/base-files/files/sbin/wifi	(working copy)
 @@ -95,6 +95,13 @@
  	config_set "$device" hwmode "$hwmode"
@@ -16,15 +16,17 @@ Index: package/base-files/files/sbin/wifi
  wifi_updown() {
  	[ enable = "$1" ] && {
  		wifi_updown disable "$2"
-@@ -110,6 +117,7 @@
+@@ -109,7 +116,9 @@
+ 		config_get iftype "$device" type
  		if eval "type ${1}_$iftype" 2>/dev/null >/dev/null; then
  			eval "scan_$iftype '$device'"
++			[ "$1" = "disable" ] && run_hooks $device $DISABLE_HOOKS
  			eval "${1}_$iftype '$device'" || echo "$device($iftype): ${1} failed"
-+			eval "run_hooks '$device' \$$(echo ${1} | tr 'a-z' 'A-Z')_HOOKS"
++			[ "$1" = "enable" ] && run_hooks $device $ENABLE_HOOKS
  		else
  			echo "$device($iftype): Interface type not supported"
  		fi
-@@ -193,6 +201,8 @@
+@@ -193,6 +202,8 @@
  
  DEVICES=
  DRIVERS=
