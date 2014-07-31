@@ -1,6 +1,6 @@
 config anyfi controller
 	option	'hostname'	'demo.anyfi.net'
-#	option	'key'		'/path/to/public_key.pem'
+#	option	'key'		'[sha256 of controller rsa public key]'
 
 config anyfi optimizer
-#	option	'key'		'/path/to/public_key.pem'
+#	option	'key'		'[sha256 of optimizer rsa public key]'
