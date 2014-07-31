@@ -43,10 +43,13 @@ define Customization/debug
 		CONFIG_PACKAGE_ATH_DEBUG=y \
 		CONFIG_PACKAGE_hostapd-utils=y
 
+	LOG_MIGR_DIR := $(OPENWRT_DIR)/files/etc/uci-migrations/1.1.3-8
 endef
 
 define Customization/debug/prebuild
 	touch $(OPENWRT_DIR)/files/.init_enable_core
+	rm $(LOG_MIGR_DIR)/01-log-set-level-info.sh
+	cp common/uci-migrations/log/set-level-debug.sh $(LOG_MIGR_DIR)/01-log-set-level-debug.sh
 endef
 
 define Customization/managed
