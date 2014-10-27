@@ -1,7 +1,5 @@
-Index: package/netifd/files/lib/netifd/dhcp.script
-===================================================================
---- package/netifd/files/lib/netifd/dhcp.script	(revision 40431)
-+++ package/netifd/files/lib/netifd/dhcp.script	(working copy)
+--- package/network/config/netifd/files/lib/netifd/dhcp.script
++++ package/network/config/netifd/files/lib/netifd/dhcp.script
 @@ -80,6 +80,17 @@
  	;;
  esac

@@ -1,8 +1,0 @@
-#!/bin/sh
-
-restore_factory_defaults() {
-	mkdir -p /overlay/etc/factory-defaults/persist && \
-		cp /tmp/factory-defaults-persist/* /overlay/etc/factory-defaults/persist 2> /dev/null
-}
-
-boot_hook_add jffs2reset restore_factory_defaults

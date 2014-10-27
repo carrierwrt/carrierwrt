@@ -22,11 +22,11 @@ define Customization/default
 		CONFIG_PACKAGE_luci-theme-bootstrap=y \
 		CONFIG_PACKAGE_luci-branding=y
 
-	TESTED := \
-		ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-ubnt-rocket-m-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-ubnt-rocket-m-squashfs-sysupgrade.bin
+	TESTED := 
+		#ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-factory.bin \
+		#ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-sysupgrade.bin \
+		#ar71xx/openwrt-ar71xx-generic-ubnt-rocket-m-squashfs-factory.bin \
+		#ar71xx/openwrt-ar71xx-generic-ubnt-rocket-m-squashfs-sysupgrade.bin
 
 endef
 

@@ -1,8 +1,8 @@
 Index: package/base-files/files/sbin/sysupgrade
 ===================================================================
---- package/base-files/files/sbin/sysupgrade	(revision 36422)
+--- package/base-files/files/sbin/sysupgrade	(revision 43057)
 +++ package/base-files/files/sbin/sysupgrade	(working copy)
-@@ -7,6 +7,7 @@
+@@ -9,6 +9,7 @@
  export INTERACTIVE=0
  export VERBOSE=1
  export SAVE_CONFIG=1
@@ -10,7 +10,7 @@ Index: package/base-files/files/sbin/sysupgrade
  export SAVE_OVERLAY=0
  export DELAY=
  export CONF_IMAGE=
-@@ -23,7 +24,7 @@
+@@ -27,7 +28,7 @@
  		-d) export DELAY="$2"; shift;;
  		-v) export VERBOSE="$(($VERBOSE + 1))";;
  		-q) export VERBOSE="$(($VERBOSE - 1))";;
@@ -19,7 +19,7 @@ Index: package/base-files/files/sbin/sysupgrade
  		-c) export SAVE_OVERLAY=1;;
  		-b|--create-backup) export CONF_BACKUP="$2" NEED_IMAGE=1; shift;;
  		-r|--restore-backup) export CONF_RESTORE="$2" NEED_IMAGE=1; shift;;
-@@ -92,7 +93,7 @@
+@@ -103,7 +104,7 @@
  	( find $(sed -ne '/^[[:space:]]*$/d; /^#/d; p' \
  		/etc/sysupgrade.conf /lib/upgrade/keep.d/* 2>/dev/null) \
  		-type f 2>/dev/null;
@@ -28,7 +28,7 @@ Index: package/base-files/files/sbin/sysupgrade
  	return 0
  }
  
-@@ -103,19 +104,18 @@
+@@ -114,21 +115,20 @@
  		-e '\,/META_[a-zA-Z0-9]*$,d' \
  		-e '\,/functions.sh$,d' \
  		-e '\,/[^/]*-opkg$,d' \
@@ -47,12 +47,14 @@ Index: package/base-files/files/sbin/sysupgrade
  
  include /lib/upgrade
  
+ [ "$1" = "nand" ] && nand_upgrade_stage2 $@
+ 
 -do_save_conffiles() {
 +do_save_config() {
  	local conf_tar="${1:-$CONF_TAR}"
  
  	[ -z "$(rootfs_type)" ] && {
-@@ -123,7 +123,16 @@
+@@ -136,7 +136,16 @@
  		ask_bool 0 "Abort" && exit
  		return 0
  	}
@@ -70,8 +72,8 @@ Index: package/base-files/files/sbin/sysupgrade
  	ask_bool 0 "Edit config file list" && vi "$CONFFILES"
  
  	v "Saving config files..."
-@@ -132,7 +141,7 @@
- }
+@@ -154,7 +163,7 @@
+ fi
  
  if [ -n "$CONF_BACKUP" ]; then
 -	do_save_conffiles "$CONF_BACKUP"
@@ -79,13 +81,13 @@ Index: package/base-files/files/sbin/sysupgrade
  	exit $?
  fi
  
-@@ -169,13 +178,12 @@
+@@ -196,12 +205,10 @@
  		;;
  	esac
  	get_image "$CONF_IMAGE" "cat" > "$CONF_TAR"
 -	export SAVE_CONFIG=1
 -elif ask_bool $SAVE_CONFIG "Keep config files over reflash"; then
--	do_save_conffiles
+-	[ $TEST -eq 1 ] || do_save_conffiles
 -	export SAVE_CONFIG=1
 +elif ask_bool $SAVE_CONFFILES "Keep config files over reflash"; then
 +	export SAVE_CONFFILES=1
@@ -93,7 +95,14 @@ Index: package/base-files/files/sbin/sysupgrade
 -	export SAVE_CONFIG=0
 +	export SAVE_CONFFILES=0
  fi
-+do_save_config
  
+ if [ $TEST -eq 1 ]; then
+@@ -208,6 +215,8 @@
+ 	exit 0
+ fi
+ 
++do_save_config
++
  run_hooks "" $sysupgrade_pre_upgrade
  
+ ubus call system upgrade

@@ -16,7 +16,7 @@ OPENWRT_URL  	:= $(OPENWRT_BASE)/$(CONFIG_OPENWRT_PATH)@$(CONFIG_OPENWRT_REV)
 PACKAGES_BASE	:= $(OPENWRT_BASE)
 PACKAGES_URL	:= $(PACKAGES_BASE)/$(CONFIG_PACKAGES_PATH)@$(CONFIG_PACKAGES_REV)
 LUCI_BASE    	:= http://svn.luci.subsignal.org/luci
-LUCI_URL     	:= $(LUCI_BASE)/$(CONFIG_LUCI_PATH)/contrib/package@$(CONFIG_LUCI_REV)
+LUCI_URL     	:= $(LUCI_BASE)/$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)
 VERSION     	:= $(shell git describe --always | cut -c2-)
 
 FWSUBDIR     	:= $(subst default,,$(CUSTOMIZATION))
@@ -27,11 +27,9 @@ CONFIG += CONFIG_PACKAGE_factory-defaults=y
 # Copy/override OpenWrt packages with CarrierWrt ditto
 # InstallPackages
 define InstallPackages
-	for package in package/*; do \
-		if [ -d $(OPENWRT_DIR)/$$package ]; then \
-			rm -rf $(OPENWRT_DIR)/$$package; \
-		fi; \
-		cp -r $$package $(OPENWRT_DIR)/$$package; \
+	mkdir -p $(OPENWRT_DIR)/package/carrierwrt
+	for package in $$(ls package); do \
+		cp -r package/$$package $(OPENWRT_DIR)/package/carrierwrt/$$package; \
 	done
 endef
 
@@ -66,20 +64,19 @@ endef
 define PatchOne
 	if [ -d $(1)/openwrt ]; then \
 		for f in $(1)/openwrt/*; do \
-			(cd $(OPENWRT_DIR) && patch -p0 < ../$$f); \
+			(cd $(OPENWRT_DIR) && patch -p0 < ../$$f) || exit 1; \
 		done; \
 	fi
 	if [ -d $(1)/package ]; then \
 		(cd $(1) && \
 		 find package -name '*.patch' \
 			 -printf 'mkdir -p $(OPENWRT_DIR)/%h/patches && \
-								cp $(1)/%p $(OPENWRT_DIR)/%h/patches/%f\n') | sh; \
+								cp $(1)/%p $(OPENWRT_DIR)/%h/patches/%f\n') | sh -e || exit 1; \
 	fi
 	if [ -d $(1)/feeds ]; then \
 		(cd $(1) && \
 		 find feeds -name '*.patch' \
-			 -printf 'mkdir -p $(OPENWRT_DIR)/%h/patches && \
-								cp $(1)/%p $(OPENWRT_DIR)/%h/patches/%f\n') | sh; \
+			 -printf 'cat $(1)/%p | (cd $(OPENWRT_DIR)/%h && patch -p1)\n') | sh -e || exit 1; \
 	fi
 endef
 
@@ -233,10 +230,6 @@ _build-images:
 
 	# Load Customization
 	$(eval $(Customization/$(CUSTOMIZATION)))
-
-	# HACK - Lock LuCI to specific revision
-	sed -i 's|^PKG_BRANCH\:=.*|PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)|' \
-			$(OPENWRT_DIR)/feeds/luci/luci/Makefile
 
 	# Write version information
 	mkdir -p $(OPENWRT_DIR)/files/etc/

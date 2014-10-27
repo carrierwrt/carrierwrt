@@ -20,6 +20,16 @@ minor() {
 
 case $1 in
    mac80211)
+      # mac80211 wireless interfaces are now setup through netifd, but we need to
+      # synchronize to avoid a race for wan, lan and wifi... :S
+      for t in $(seq 15); do
+          ifstatus wan | grep -q '"up":.*true' && \
+              ifstatus lan | grep -q '"up":.*true' && \
+              wifi status | grep -q '"up":.*true' && break
+          sleep 1
+          echo "anyfi-probe: Waiting $((15-$t)) seconds more for interfaces to come up..."
+      done
+
       COMPAT_VER=$(opkg list-installed kmod-mac80211 | cut -d'+' -f2)
       KERNEL_VER=$(uname -r)
 

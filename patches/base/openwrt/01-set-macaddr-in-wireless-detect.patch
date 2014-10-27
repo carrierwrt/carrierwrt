@@ -1,15 +1,19 @@
-Index: package/mac80211/files/lib/wifi/mac80211.sh
+Index: package/kernel/mac80211/files/lib/wifi/mac80211.sh
 ===================================================================
---- package/mac80211/files/lib/wifi/mac80211.sh	(revision 40431)
-+++ package/mac80211/files/lib/wifi/mac80211.sh	(working copy)
-@@ -623,7 +623,8 @@
- 		}
- 		iw phy "$dev" info | grep -q '2412 MHz' || { mode_band="a"; channel="36"; }
+--- package/kernel/mac80211/files/lib/wifi/mac80211.sh	(revision 43057)
++++ package/kernel/mac80211/files/lib/wifi/mac80211.sh	(working copy)
+@@ -87,13 +87,7 @@
+ 
+ 		[ -n $htmode ] && append ht_capab "	option htmode	$htmode" "$N"
  
 -		if [ -x /usr/bin/readlink ]; then
-+		# CarrierWrt: We need the MAC address for other purposes, so let's stick with that for now.
-+		if false && [ -x /usr/bin/readlink ]; then
- 			path="$(readlink -f /sys/class/ieee80211/${dev}/device)"
- 			path="${path##/sys/devices/}"
- 			dev_id="	option path	'$path'"
-
+-			path="$(readlink -f /sys/class/ieee80211/${dev}/device)"
+-			path="${path##/sys/devices/}"
+-			dev_id="	option path	'$path'"
+-		else
+-			dev_id="	option macaddr	$(cat /sys/class/ieee80211/${dev}/macaddress)"
+-		fi
++		dev_id="	option macaddr	$(cat /sys/class/ieee80211/${dev}/macaddress)"
+ 
+ 		cat <<EOF
+ config wifi-device  radio$devidx

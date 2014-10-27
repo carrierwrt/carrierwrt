@@ -1,32 +1,38 @@
 Index: package/base-files/files/sbin/wifi
 ===================================================================
---- package/base-files/files/sbin/wifi	(revision 40431)
+--- package/base-files/files/sbin/wifi	(revision 43057)
 +++ package/base-files/files/sbin/wifi	(working copy)
-@@ -95,6 +95,13 @@
+@@ -105,6 +105,13 @@
  	config_set "$device" hwmode "$hwmode"
  }
  
 +run_hooks() {
-+	local arg="$1"; shift
-+	for func in "$@"; do
-+		eval "$func $arg"
-+	done
++   local arg="$1"; shift
++   for func in "$@"; do
++       eval "$func $arg"
++   done
 +}
 +
- wifi_updown() {
- 	[ enable = "$1" ] && {
- 		wifi_updown disable "$2"
-@@ -109,7 +116,9 @@
+ _wifi_updown() {
+ 	for device in ${2:-$DEVICES}; do (
+ 		config_get disabled "$device" disabled
+@@ -113,6 +120,7 @@
+ 			set disable
+ 		}
  		config_get iftype "$device" type
++		[ "$1" = "disable" ] && run_hooks $device $DISABLE_HOOKS
  		if eval "type ${1}_$iftype" 2>/dev/null >/dev/null; then
  			eval "scan_$iftype '$device'"
-+			[ "$1" = "disable" ] && run_hooks $device $DISABLE_HOOKS
  			eval "${1}_$iftype '$device'" || echo "$device($iftype): ${1} failed"
-+			[ "$1" = "enable" ] && run_hooks $device $ENABLE_HOOKS
- 		else
+@@ -119,6 +127,7 @@
+ 		elif [ ! -f /lib/netifd/wireless/$iftype.sh ]; then
  			echo "$device($iftype): Interface type not supported"
  		fi
-@@ -193,6 +202,8 @@
++		[ "$1" = "enable" ] && run_hooks $device $ENABLE_HOOKS
+ 	); done
+ }
+ 
+@@ -222,6 +231,8 @@
  
  DEVICES=
  DRIVERS=

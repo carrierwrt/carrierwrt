@@ -479,7 +479,7 @@ anyfi_enable()
 	controller="$(uci get anyfi.controller.hostname 2>/dev/null)"
 	[ -n "$controller" ] || return 0
 
-	# Optional controller and optimizer public keys
+	# Optional controller and optimizer keys
 	controller_key="$(uci get anyfi.controller.key 2>/dev/null)"
 	optimizer_key="$(uci get anyfi.optimizer.key 2>/dev/null)"
 

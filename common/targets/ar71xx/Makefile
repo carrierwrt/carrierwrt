@@ -12,8 +12,6 @@ define Target/ar71xx
 		CONFIG_TARGET_ROOTFS_JFFS2=n
 
 	IMAGES := \
-		ar71xx/openwrt-ar71xx-generic-a02-rb-w300n-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-a02-rb-w300n-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-alfa-ap96-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-alfa-ap96-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-alfa-ap96-squashfs-sysupgrade.bin \
@@ -28,9 +26,18 @@ define Target/ar71xx
 		ar71xx/openwrt-ar71xx-generic-all0315n-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-all0315n-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-all0315n-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-ap136-kernel.bin \
-		ar71xx/openwrt-ar71xx-generic-ap136-rootfs-squashfs.bin \
-		ar71xx/openwrt-ar71xx-generic-ap136-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-ap132-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-ap132-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-ap132-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-ap135-020-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-ap135-020-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-ap135-020-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-ap136-010-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-ap136-010-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-ap136-010-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-ap136-020-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-ap136-020-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-ap136-020-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ap81-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-ap81-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-ap81-squashfs-sysupgrade.bin \
@@ -40,41 +47,71 @@ define Target/ar71xx
 		ar71xx/openwrt-ar71xx-generic-ap96-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-ap96-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-ap96-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-archer-c5-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-archer-c5-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-archer-c7-v1-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-archer-c7-v1-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-archer-c7-v2-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-archer-c7-v2-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-bxu2000n-2-a1-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-bxu2000n-2-a1-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-bxu2000n-2-a1-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-cap4200ag-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-cap4200ag-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-cap4200ag-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-carambola2-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-carambola2-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-carambola2-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-db120-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-db120-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-db120-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-dir-600-a1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-dir-600-a1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-dir-601-a1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-dir-601-a1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-dir-615-c1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-dir-615-c1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-dir-615-e4-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-dir-615-e4-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-dir-505-a1-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-dir-505-a1-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-dir-825-b1-fat-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-dir-825-b1-squashfs-backup-loader.bin \
 		ar71xx/openwrt-ar71xx-generic-dir-825-b1-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-dir-825-b1-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-dir-825-c1-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-dir-825-c1-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-dir-835-a1-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-dir-835-a1-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-dlrtdev01-fat-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-dlrtdev01-squashfs-backup-loader.bin \
 		ar71xx/openwrt-ar71xx-generic-dlrtdev01-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-dlrtdev01-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-dragino2-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-dragino2-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-dragino2-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-eap300v2-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-eap300v2-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-eap7660d-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-eap7660d-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-eap7660d-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-ew-dorin-kernel.bin \
-		ar71xx/openwrt-ar71xx-generic-ew-dorin-rootfs-squashfs.bin \
-		ar71xx/openwrt-ar71xx-generic-ew-dorin-router-kernel.bin \
-		ar71xx/openwrt-ar71xx-generic-ew-dorin-router-rootfs-squashfs.bin \
-		ar71xx/openwrt-ar71xx-generic-ew-dorin-router-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-ew-dorin-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-fr-54rtr-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-fr-54rtr-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-el-m150-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-el-m150-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-el-mini-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-el-mini-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-esr1750-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-esr1750-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-esr1750-squashfs-factory.dlf \
+		ar71xx/openwrt-ar71xx-generic-esr1750-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-esr900-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-esr900-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-esr900-squashfs-factory.dlf \
+		ar71xx/openwrt-ar71xx-generic-esr900-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-ew-dorin-16M-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-ew-dorin-16M-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-ew-dorin-16M-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-gl-inet-v1-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-gl-inet-v1-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-hiwifi-hc6361-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-hiwifi-hc6361-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-hiwifi-hc6361-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-hornet-ub-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-hornet-ub-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-hornet-ub-x2-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-hornet-ub-x2-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-hornet-ub-x2-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ja76pf2-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-ja76pf2-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-ja76pf2-squashfs-sysupgrade.bin \
@@ -85,94 +122,74 @@ define Target/ar71xx
 		ar71xx/openwrt-ar71xx-generic-jwap003-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-jwap003-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-mr600-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-mw4530r-v1-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-mw4530r-v1-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-mynet-n600-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-mynet-n600-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-mynet-n750-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-mynet-n750-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-mynet-rext-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-mynet-rext-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-mzk-w04nu-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-mzk-w04nu-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-mzk-w300nh-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-mzk-w300nh-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-nbg460n_550n_550nh-u-boot.bin \
 		ar71xx/openwrt-ar71xx-generic-om2p-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-om5p-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-oolite-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-oolite-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-pb42-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-pb42-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-pb42-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-pb44-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-pb44-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-pb44-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-root.squashfs \
+		ar71xx/openwrt-ar71xx-generic-root.squashfs-64k \
 		ar71xx/openwrt-ar71xx-generic-rw2458n-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-rw2458n-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tew-632brp-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tew-632brp-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tew-652brp-recovery-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tew-652brp-recovery-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tew-652brp-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tew-652brp-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-smart-300-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-smart-300-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tew-673gru-fat-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tew-673gru-squashfs-backup-loader.bin \
 		ar71xx/openwrt-ar71xx-generic-tew-673gru-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-tew-673gru-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-mr11u-v1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-mr11u-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-mr3020-v1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-mr3020-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-mr3040-v1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-mr3040-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-mr3220-v1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-mr3220-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-mr3420-v1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-mr3420-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wa701n-v1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wa701n-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wa7510n-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wa7510n-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wa901nd-v1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wa901nd-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wa901nd-v2-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wa901nd-v2-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-tew-732br-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-tew-732br-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wdr3500-v1-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wdr3500-v1-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wdr3600-v1-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wdr3600-v1-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wdr4300-v1-il-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wdr4300-v1-il-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wdr4300-v1-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wdr4300-v1-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wdr4310-v1-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wdr4310-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr1041n-v2-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr1041n-v2-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wdr4900-v2-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wdr4900-v2-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr1043nd-v1-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr1043nd-v1-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wr1043nd-v2-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wr1043nd-v2-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr2543-v1-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr2543-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr703n-v1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr703n-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr740n-v1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr740n-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr740n-v3-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr740n-v3-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr740n-v4-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr740n-v4-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr741nd-v1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr741nd-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr741nd-v2-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr741nd-v2-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr741nd-v4-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr741nd-v4-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr743nd-v1-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr743nd-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr841nd-v3-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr841nd-v3-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr841nd-v5-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr841nd-v5-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr841nd-v7-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr841nd-v7-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr841n-v8-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr841n-v8-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wr710n-v1-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wr710n-v1-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr842n-v1-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-tl-wr842n-v1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr941nd-v2-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr941nd-v2-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr941nd-v3-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr941nd-v3-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr941nd-v4-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-tl-wr941nd-v4-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wr842n-v2-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-tl-wr842n-v2-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-tube2h-16M-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-tube2h-16M-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-tube2h-16M-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-tube2h-8M-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-tube2h-8M-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ubdev01-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-ubdev01-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-ubnt-air-gateway-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-ubnt-air-gateway-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-airrouter-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-airrouter-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-bullet-m-squashfs-factory.bin \
@@ -181,43 +198,57 @@ define Target/ar71xx
 		ar71xx/openwrt-ar71xx-generic-ubnt-ls-sr71-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-xw-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-xw-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-rocket-m-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-rocket-m-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-rspro-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-rspro-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-rs-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-rs-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-ubnt-uap-pro-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-ubnt-uap-pro-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-unifi-outdoor-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-unifi-outdoor-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-unifi-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-unifi-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-whr-g301n-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-whr-g301n-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-whr-g301n-squashfs-tftp.bin \
-		ar71xx/openwrt-ar71xx-generic-whr-hp-g300n-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-whr-hp-g300n-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-whr-hp-g300n-squashfs-tftp.bin \
-		ar71xx/openwrt-ar71xx-generic-whr-hp-gn-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-whr-hp-gn-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-whr-hp-gn-squashfs-tftp.bin \
-		ar71xx/openwrt-ar71xx-generic-wlae-ag300n-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-wlae-ag300n-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-wlae-ag300n-squashfs-tftp.bin \
+		ar71xx/openwrt-ar71xx-generic-wlr8100-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-wlr8100-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-wlr8100-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-wndap360-kernel.bin \
+		ar71xx/openwrt-ar71xx-generic-wndap360-rootfs-squashfs.bin \
+		ar71xx/openwrt-ar71xx-generic-wndap360-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-wndr3700-squashfs-factory.img \
 		ar71xx/openwrt-ar71xx-generic-wndr3700-squashfs-factory-NA.img \
 		ar71xx/openwrt-ar71xx-generic-wndr3700-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-wndr3700v2-squashfs-factory.img \
 		ar71xx/openwrt-ar71xx-generic-wndr3700v2-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-wndr3800ch-squashfs-factory.img \
+		ar71xx/openwrt-ar71xx-generic-wndr3800ch-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-wndr3800-squashfs-factory.img \
 		ar71xx/openwrt-ar71xx-generic-wndr3800-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-wndrmac-squashfs-factory.img \
 		ar71xx/openwrt-ar71xx-generic-wndrmac-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-wndrmacv2-squashfs-factory.img \
 		ar71xx/openwrt-ar71xx-generic-wndrmacv2-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-wnr2200-squashfs-factory.img \
+		ar71xx/openwrt-ar71xx-generic-wnr2200-squashfs-factory-NA.img \
+		ar71xx/openwrt-ar71xx-generic-wnr2200-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-wp543-squashfs-16M-factory.img \
+		ar71xx/openwrt-ar71xx-generic-wp543-squashfs-16M-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-wp543-squashfs-8M-factory.img \
+		ar71xx/openwrt-ar71xx-generic-wp543-squashfs-8M-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-wpe72-squashfs-16M-factory.img \
+		ar71xx/openwrt-ar71xx-generic-wpe72-squashfs-16M-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-wpe72-squashfs-8M-factory.img \
+		ar71xx/openwrt-ar71xx-generic-wpe72-squashfs-8M-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-wrt160nl-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-wrt160nl-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-wrt400n-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-wrt400n-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-wzr-600dhp-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-wzr-600dhp-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-wzr-600dhp-squashfs-tftp.bin \
 		ar71xx/openwrt-ar71xx-generic-wzr-hp-ag300h-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-wzr-hp-ag300h-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-wzr-hp-ag300h-squashfs-tftp.bin \

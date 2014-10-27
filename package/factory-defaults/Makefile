@@ -25,11 +25,6 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR)  $(1)/lib/upgrade
 	$(INSTALL_DATA) ./files/lib/upgrade/factory-defaults.sh \
 			$(1)/lib/upgrade/factory-defaults.sh
-	$(INSTALL_DIR)  $(1)/lib/firstboot
-	$(INSTALL_DATA) ./files/lib/firstboot/10_save_factory_defaults \
-			$(1)/lib/firstboot/10_save_factory_defaults
-	$(INSTALL_DATA) ./files/lib/firstboot/99_10_restore_factory_defaults \
-			$(1)/lib/firstboot/99_10_restore_factory_defaults
 	$(INSTALL_DIR)  $(1)/etc/hotplug.d/button
 	$(INSTALL_DATA) ./files/etc/hotplug.d/button/99-reset-to-factory-defaults \
 			$(1)/etc/hotplug.d/button/99-reset-to-factory-defaults
