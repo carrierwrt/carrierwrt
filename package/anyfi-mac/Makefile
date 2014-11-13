@@ -3,7 +3,7 @@ include $(TOPDIR)/rules.mk
 ANYFI_TARGET := $(ARCH)-linux-$(subst C,c,$(LIBC))-$(LIBCV)
 
 PKG_NAME    := anyfi-mac
-PKG_VERSION := 1.5.13
+PKG_VERSION := 1.5.15
 PKG_RELEASE := 1
 
 PKG_SOURCE     := anyfimac-$(PKG_VERSION)-$(ANYFI_TARGET).tar.bz2
