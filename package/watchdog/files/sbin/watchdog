@@ -50,6 +50,10 @@ monitor() {
 		if run_hooks $HEALTHCHECKS; then
 			# We live to fight another day
 			echo 1>&3
+		else
+			# Reboot explicitly instead of relying on watchdog - some
+			# SoCs just lock up when the watchdog tries to get them
+			reboot
 		fi
 		# Sleep but awake immediately if there's a signal
 		sleep $reset &
