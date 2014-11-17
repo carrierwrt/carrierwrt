@@ -93,7 +93,7 @@ fi
 if [ "$FG" -ne 1 ]; then
 	# Daemonize
 	cd /tmp
-	exec 0<&- 1>&- 2>&-
+	exec 0< /dev/null 1> /dev/null 2>&1
 	monitor "$DEVICE" "$RESET" &
 else
 	monitor "$DEVICE" "$RESET"
