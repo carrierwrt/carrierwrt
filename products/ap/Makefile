@@ -26,7 +26,9 @@ define Customization/default
 		ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ubnt-rocket-m-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-ubnt-rocket-m-squashfs-sysupgrade.bin
+		ar71xx/openwrt-ar71xx-generic-ubnt-rocket-m-squashfs-sysupgrade.bin \
+		ar71xx/openwrt-ar71xx-generic-ubnt-unifi-squashfs-factory.bin \
+		ar71xx/openwrt-ar71xx-generic-ubnt-unifi-squashfs-sysupgrade.bin
 
 endef
 
