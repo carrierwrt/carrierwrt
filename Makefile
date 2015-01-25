@@ -15,7 +15,7 @@ OPENWRT_DIR  	:= openwrt
 OPENWRT_URL  	:= $(OPENWRT_BASE)/$(CONFIG_OPENWRT_PATH)@$(CONFIG_OPENWRT_REV)
 PACKAGES_BASE	:= $(OPENWRT_BASE)
 PACKAGES_URL	:= $(PACKAGES_BASE)/$(CONFIG_PACKAGES_PATH)@$(CONFIG_PACKAGES_REV)
-LUCI_BASE    	:= http://svn.luci.subsignal.org/luci
+LUCI_BASE    	:= https://subversion.assembla.com/svn/luci
 LUCI_URL     	:= $(LUCI_BASE)/$(CONFIG_LUCI_PATH)/contrib/package@$(CONFIG_LUCI_REV)
 VERSION     	:= $(shell git describe --always | cut -c2-)
 
@@ -235,8 +235,10 @@ _build-images:
 	$(eval $(Customization/$(CUSTOMIZATION)))
 
 	# HACK - Lock LuCI to specific revision
-	sed -i 's|^PKG_BRANCH\:=.*|PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)|' \
-			$(OPENWRT_DIR)/feeds/luci/luci/Makefile
+	sed -i \
+		-e 's|^PKG_BRANCH\:=.*|PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)|' \
+		-e 's|http://svn.luci.subsignal.org|https://subversion.assembla.com/svn|' \
+		$(OPENWRT_DIR)/feeds/luci/luci/Makefile
 
 	# Write version information
 	mkdir -p $(OPENWRT_DIR)/files/etc/
