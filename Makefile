@@ -17,16 +17,37 @@ VERSION     	:= $(shell git describe --always | cut -c2-)
 
 FWSUBDIR     	:= $(subst default,,$(CUSTOMIZATION))
 
-# Required packages
-CONFIG += CONFIG_PACKAGE_factory-defaults=y
+# Revert OpenWrt and feeds to pristine condition
+# RevertAll
+define RevertAll
+	$(OPENWRT_DIR)/scripts/feeds uninstall -a
+	scripts/svn-pristine $(OPENWRT_DIR) | sh
+	for feed in $(OPENWRT_DIR)/feeds/*; do \
+		if [ -d $$feed/.svn ]; then \
+			scripts/svn-pristine $$feed | sh; \
+		elif [ -d $$feed/.git ]; then \
+			(cd $$feed; git reset --hard; git clean -qfdx) \
+		fi \
+	done
+	# The special 'files' dir is in svn:ignore so we need to manually delete it
+	rm -rf $(OPENWRT_DIR)/files/*
+endef
 
-# Copy/override OpenWrt packages with CarrierWrt ditto
-# InstallPackages
+# InstallPackage <package>
+define InstallPackage
+	if [ -d package/$(1) ]; then \
+		cp -r package/$(1) $(OPENWRT_DIR)/package/carrierwrt/$(1); \
+	else \
+		$(OPENWRT_DIR)/scripts/feeds install $(1); \
+	fi
+endef
+
+# Install feed and local CarrierWrt packages
+# InstallPackages <config>
 define InstallPackages
 	mkdir -p $(OPENWRT_DIR)/package/carrierwrt
-	for package in $$(ls package); do \
-		cp -r package/$$package $(OPENWRT_DIR)/package/carrierwrt/$$package; \
-	done
+	$(foreach line,$(filter CONFIG_PACKAGE_%=y,$(1)),
+		$(call InstallPackage,$(subst CONFIG_PACKAGE_,,$(subst =y,,$(line)))))
 endef
 
 # WriteLine <line> <file>
@@ -85,9 +106,8 @@ define Patch
 	)
 endef
 
-# Build <config>
+# Build
 define Build
-	$(call Configure,$(1))
 	$(MAKE) MAKEOVERRIDES='' -C $(OPENWRT_DIR) V=$(V)
 endef
 
@@ -100,8 +120,8 @@ define InstallImage
 	cd $(2) && md5sum $(call ImageName,$(1)) > $(call ImageName,$(1)).md5
 endef
 
-# Install <images> <tested>
-define Install
+# InstallImages <images> <tested>
+define InstallImages
 	mkdir -p firmware/$(PRODUCT)/$(FWSUBDIR)
 	mkdir -p firmware/$(PRODUCT)/$(FWSUBDIR)/untested
 	$(foreach image,$(1), \
@@ -202,21 +222,8 @@ _build-customizations:
 
 _build-images:
 
-	# Revert openwrt and feeds to pristine condition
-	scripts/svn-pristine $(OPENWRT_DIR) | sh
-	for feed in $(OPENWRT_DIR)/feeds/*; do \
-		if [ -d $$feed/.svn ]; then \
-			scripts/svn-pristine $$feed | sh; \
-		elif [ -d $$feed/.git ]; then \
-			(cd $$feed; git reset --hard; git clean -qfdx) \
-		fi \
-	done
-
-	# The special 'files' dir is in svn:ignore so we need to manually delete it
-	rm -rf $(OPENWRT_DIR)/files/*
-
-	# Install packages
-	$(call InstallPackages)
+	# Revert all patches and added files
+	$(call RevertAll)
 
 	# Load Product
 	$(eval $(Product/$(PRODUCT)))
@@ -226,6 +233,12 @@ _build-images:
 
 	# Load Customization
 	$(eval $(Customization/$(CUSTOMIZATION)))
+
+	# Install packages
+	$(call InstallPackages,$(CONFIG))
+
+	# Configure
+	$(call Configure,$(CONFIG))
 
 	# Write version information
 	mkdir -p $(OPENWRT_DIR)/files/etc/
@@ -256,24 +269,16 @@ _build-images:
 	$(Customization/$(CUSTOMIZATION)/prebuild)
 
 	# Build
-	$(call Build,$(CONFIG))
+	$(call Build)
 
-	# Install
-	$(call Install,$(IMAGES),$(TESTED))
+	# Install images
+	$(call InstallImages,$(IMAGES),$(TESTED))
 
 $(OPENWRT_DIR):
 	svn co $(OPENWRT_URL) $@
 
-$(OPENWRT_DIR)/feeds.conf: feeds.conf config.mk
-	# NOTE: OpenWrt "feeds install" will resolve package dependencies and
-	#       install other packages as well. To make sure those dependencies
-	#       are primarily resolved against CarrierWrt packages we need to
-	#       install them here.
-	$(call InstallPackages)
-
+$(OPENWRT_DIR)/feeds.conf: feeds.conf $(OPENWRT_DIR)
 	cp feeds.conf $@
 	$(OPENWRT_DIR)/scripts/feeds update
-	$(OPENWRT_DIR)/scripts/feeds uninstall -a
-	$(OPENWRT_DIR)/scripts/feeds install $(CONFIG_FEED_PACKAGES)
 
 .PHONY: all help _check _info _build _build-products _build-targets _build-images

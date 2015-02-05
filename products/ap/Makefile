@@ -11,6 +11,8 @@ define Product/ap
 		CONFIG_PACKAGE_wpad-mini=n \
 		CONFIG_PACKAGE_wpad=y \
 		CONFIG_PACKAGE_anyfi-mac=y \
+		CONFIG_PACKAGE_shflags=y \
+		CONFIG_PACKAGE_libmicroxml=y \
 		CONFIG_PACKAGE_easycwmp=y
 
 endef

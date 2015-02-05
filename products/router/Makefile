@@ -56,6 +56,8 @@ define Customization/managed
 	$(call Customization/default)
 
 	CONFIG += \
+		CONFIG_PACKAGE_shflags=y \
+		CONFIG_PACKAGE_libmicroxml=y \
 		CONFIG_PACKAGE_easycwmp=y
 
 	TR69_MIGR_DIR := $(OPENWRT_DIR)/files/etc/uci-migrations/1.1.3-6
