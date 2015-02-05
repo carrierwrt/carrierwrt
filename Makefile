@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2013 CarrierWrt.org
+# Copyright (C) 2013-2015 CarrierWrt.org
 #
 
 include config.mk
@@ -13,10 +13,6 @@ V ?= 0
 OPENWRT_BASE 	:= svn://svn.openwrt.org/openwrt
 OPENWRT_DIR  	:= openwrt
 OPENWRT_URL  	:= $(OPENWRT_BASE)/$(CONFIG_OPENWRT_PATH)@$(CONFIG_OPENWRT_REV)
-PACKAGES_BASE	:= $(OPENWRT_BASE)
-PACKAGES_URL	:= $(PACKAGES_BASE)/$(CONFIG_PACKAGES_PATH)@$(CONFIG_PACKAGES_REV)
-LUCI_BASE    	:= http://svn.luci.subsignal.org/luci
-LUCI_URL     	:= $(LUCI_BASE)/$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)
 VERSION     	:= $(shell git describe --always | cut -c2-)
 
 FWSUBDIR     	:= $(subst default,,$(CUSTOMIZATION))
@@ -33,16 +29,16 @@ define InstallPackages
 	done
 endef
 
-# WriteConfig <line>
-define WriteConfig
-	echo $(1) >> $(OPENWRT_DIR)/.config
+# WriteLine <line> <file>
+define WriteLine
+	echo $(1) >> $(2)
 endef
 
 # Generate an OpenWrt config file for a given target
 # Configure <config>
 define Configure
 	rm -f $(OPENWRT_DIR)/.config
-	$(foreach line,$(1),$(call WriteConfig,$(line)) &&) true
+	$(foreach line,$(1),$(call WriteLine,$(line),$(OPENWRT_DIR)/.config) &&) true
 	$(MAKE) MAKEOVERRIDES='' -C $(OPENWRT_DIR) defconfig > /dev/null
 endef
 
@@ -151,8 +147,6 @@ _check:
 		echo "WARNING: Up/downgrading openwrt. Dependency tracking may not work!"; \
 		svn update -r $(CONFIG_OPENWRT_REV) $(OPENWRT_DIR); \
 	fi
-	@svn info $(OPENWRT_DIR)/feeds/luci     | grep -q "Revision: $(CONFIG_LUCI_REV)"
-	@svn info $(OPENWRT_DIR)/feeds/packages | grep -q "Revision: $(CONFIG_PACKAGES_REV)"
 
 _info:
 	@echo "==============================================================="
@@ -212,7 +206,9 @@ _build-images:
 	scripts/svn-pristine $(OPENWRT_DIR) | sh
 	for feed in $(OPENWRT_DIR)/feeds/*; do \
 		if [ -d $$feed/.svn ]; then \
-			 scripts/svn-pristine $$feed | sh; \
+			scripts/svn-pristine $$feed | sh; \
+		elif [ -d $$feed/.git ]; then \
+			(cd $$feed; git reset --hard; git clean -qfdx) \
 		fi \
 	done
 
@@ -268,22 +264,16 @@ _build-images:
 $(OPENWRT_DIR):
 	svn co $(OPENWRT_URL) $@
 
-$(OPENWRT_DIR)/feeds.conf: config.mk
+$(OPENWRT_DIR)/feeds.conf: feeds.conf config.mk
 	# NOTE: OpenWrt "feeds install" will resolve package dependencies and
 	#       install other packages as well. To make sure those dependencies
 	#       are primarily resolved against CarrierWrt packages we need to
 	#       install them here.
 	$(call InstallPackages)
 
-	# BUG: OpenWrt "feeds update" will update to latest revisions
-	#      (regardless of @ in URL). As a workaround we do a "feeds clean".
-	$(OPENWRT_DIR)/scripts/feeds clean
-
-	echo "src-svn luci $(LUCI_URL)" > $@
-	echo "src-svn packages $(PACKAGES_URL)" >> $@
+	cp feeds.conf $@
 	$(OPENWRT_DIR)/scripts/feeds update
 	$(OPENWRT_DIR)/scripts/feeds uninstall -a
-	$(OPENWRT_DIR)/scripts/feeds install $(CONFIG_LUCI_LIST)
-	$(OPENWRT_DIR)/scripts/feeds install $(CONFIG_PACKAGES_LIST)
+	$(OPENWRT_DIR)/scripts/feeds install $(CONFIG_FEED_PACKAGES)
 
 .PHONY: all help _check _info _build _build-products _build-targets _build-images
