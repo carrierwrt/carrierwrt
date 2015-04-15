@@ -18,6 +18,8 @@ PACKAGES_URL	:= $(PACKAGES_BASE)/$(CONFIG_PACKAGES_PATH)@$(CONFIG_PACKAGES_REV)
 LUCI_BASE    	:= https://subversion.assembla.com/svn/luci
 LUCI_URL     	:= $(LUCI_BASE)/$(CONFIG_LUCI_PATH)/contrib/package@$(CONFIG_LUCI_REV)
 VERSION     	:= $(shell git describe --always | cut -c2-)
+UNAME_S			:= $(shell uname -s)
+PFIND			:= find
 
 FWSUBDIR     	:= $(subst default,,$(CUSTOMIZATION))
 
@@ -71,13 +73,13 @@ define PatchOne
 	fi
 	if [ -d $(1)/package ]; then \
 		(cd $(1) && \
-		 find package -name '*.patch' \
+		 $(PFIND) package -name '*.patch' \
 			 -printf 'mkdir -p $(OPENWRT_DIR)/%h/patches && \
 								cp $(1)/%p $(OPENWRT_DIR)/%h/patches/%f\n') | sh; \
 	fi
 	if [ -d $(1)/feeds ]; then \
 		(cd $(1) && \
-		 find feeds -name '*.patch' \
+		 $(PFIND) feeds -name '*.patch' \
 			 -printf 'mkdir -p $(OPENWRT_DIR)/%h/patches && \
 								cp $(1)/%p $(OPENWRT_DIR)/%h/patches/%f\n') | sh; \
 	fi
@@ -150,12 +152,29 @@ help:
 # ======================================================================
 
 _check:
+	
 	@if ! svn info $(OPENWRT_DIR) | grep -q "Revision: $(CONFIG_OPENWRT_REV)"; then \
 		echo "WARNING: Up/downgrading openwrt. Dependency tracking may not work!"; \
 		svn update -r $(CONFIG_OPENWRT_REV) $(OPENWRT_DIR); \
 	fi
 	@svn info $(OPENWRT_DIR)/feeds/luci     | grep -q "Revision: $(CONFIG_LUCI_REV)"
 	@svn info $(OPENWRT_DIR)/feeds/packages | grep -q "Revision: $(CONFIG_PACKAGES_REV)"
+
+# Check mac os prerequisites
+ifeq ($(UNAME_S),Darwin)
+
+ifeq (, $(shell which gfind))
+	$(error "No gfind in path, please brew install findutils")
+endif
+
+PFIND			:= gfind
+
+ifeq (, $(shell which md5sum))
+	$(error "No md5sum in path, please brew install md5sha1sum")
+endif
+
+endif
+
 
 _info:
 	@echo "==============================================================="
