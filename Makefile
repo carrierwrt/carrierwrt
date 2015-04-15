@@ -235,7 +235,7 @@ _build-images:
 	$(eval $(Customization/$(CUSTOMIZATION)))
 
 	# HACK - Lock LuCI to specific revision
-	sed -i \
+	sed -i '' \
 		-e 's|^PKG_BRANCH\:=.*|PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)|' \
 		-e 's|http://svn.luci.subsignal.org|https://subversion.assembla.com/svn|' \
 		$(OPENWRT_DIR)/feeds/luci/luci/Makefile
