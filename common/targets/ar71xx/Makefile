@@ -28,9 +28,6 @@ define Target/ar71xx
 		ar71xx/openwrt-ar71xx-generic-all0315n-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-all0315n-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-all0315n-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-ap136-kernel.bin \
-		ar71xx/openwrt-ar71xx-generic-ap136-rootfs-squashfs.bin \
-		ar71xx/openwrt-ar71xx-generic-ap136-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-ap81-kernel.bin \
 		ar71xx/openwrt-ar71xx-generic-ap81-rootfs-squashfs.bin \
 		ar71xx/openwrt-ar71xx-generic-ap81-squashfs-sysupgrade.bin \
@@ -52,8 +49,6 @@ define Target/ar71xx
 		ar71xx/openwrt-ar71xx-generic-dir-601-a1-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-dir-615-c1-squashfs-factory.bin \
 		ar71xx/openwrt-ar71xx-generic-dir-615-c1-squashfs-sysupgrade.bin \
-		ar71xx/openwrt-ar71xx-generic-dir-615-e4-squashfs-factory.bin \
-		ar71xx/openwrt-ar71xx-generic-dir-615-e4-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-dir-825-b1-fat-squashfs-sysupgrade.bin \
 		ar71xx/openwrt-ar71xx-generic-dir-825-b1-squashfs-backup-loader.bin \
 		ar71xx/openwrt-ar71xx-generic-dir-825-b1-squashfs-factory.bin \

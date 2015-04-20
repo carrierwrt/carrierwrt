@@ -68,7 +68,7 @@ endef
 define PatchOne
 	if [ -d $(1)/openwrt ]; then \
 		for f in $(1)/openwrt/*; do \
-			(cd $(OPENWRT_DIR) && patch -p0 < ../$$f); \
+			(cd $(OPENWRT_DIR) && patch --ignore-whitespace -p0 < ../$$f); \
 		done; \
 	fi
 	if [ -d $(1)/package ]; then \
@@ -121,6 +121,17 @@ define Install
 	) 
 endef
 
+define PatchAll
+	# Apply base patches
+	$(call Patch,$(CONFIG),patches)
+
+	# Apply product patches
+	$(call Patch,$(CONFIG),products/$(PRODUCT)/patches)
+
+	# Apply target patches
+	$(call Patch,$(CONFIG),common/targets/$(TARGET)/patches)
+endef
+
 # ======================================================================
 #  User targets
 # ======================================================================
@@ -157,8 +168,6 @@ _check:
 		echo "WARNING: Up/downgrading openwrt. Dependency tracking may not work!"; \
 		svn update -r $(CONFIG_OPENWRT_REV) $(OPENWRT_DIR); \
 	fi
-	@svn info $(OPENWRT_DIR)/feeds/luci     | grep -q "Revision: $(CONFIG_LUCI_REV)"
-	@svn info $(OPENWRT_DIR)/feeds/packages | grep -q "Revision: $(CONFIG_PACKAGES_REV)"
 
 # Check mac os prerequisites
 ifeq ($(UNAME_S),Darwin)
@@ -175,6 +184,8 @@ endif
 
 endif
 
+_patch:
+	$(call PatchAll)
 
 _info:
 	@echo "==============================================================="
@@ -254,10 +265,10 @@ _build-images:
 	$(eval $(Customization/$(CUSTOMIZATION)))
 
 	# HACK - Lock LuCI to specific revision
-	sed -i '' \
-		-e 's|^PKG_BRANCH\:=.*|PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)|' \
-		-e 's|http://svn.luci.subsignal.org|https://subversion.assembla.com/svn|' \
-		$(OPENWRT_DIR)/feeds/luci/luci/Makefile
+# sed -i '' \
+#		-e 's|^PKG_BRANCH\:=.*|PKG_BRANCH\:=$(CONFIG_LUCI_PATH)@$(CONFIG_LUCI_REV)|' \
+#		-e 's|http://svn.luci.subsignal.org|https://subversion.assembla.com/svn|' \
+#		$(OPENWRT_DIR)/feeds/luci/luci/Makefile
 
 	# Write version information
 	mkdir -p $(OPENWRT_DIR)/files/etc/
@@ -267,19 +278,13 @@ _build-images:
 	echo $(CUSTOMIZATION) > $(OPENWRT_DIR)/files/etc/carrierwrt_customization
 	
 	# Apply product changes
-	-cp -rL products/$(PRODUCT)/files/* $(OPENWRT_DIR)/files/
+	-cp -R products/$(PRODUCT)/files/* $(OPENWRT_DIR)/files/
 
 	# Apply target changes
-	-cp -rL products/$(PRODUCT)/targets/$(TARGET)/files/* $(OPENWRT_DIR)/files/
-
-	# Apply base patches
-	$(call Patch,$(CONFIG),patches)
-
-	# Apply product patches
-	$(call Patch,$(CONFIG),products/$(PRODUCT)/patches)
-
-	# Apply target patches
-	$(call Patch,$(CONFIG),common/targets/$(TARGET)/patches)
+	-cp -R products/$(PRODUCT)/targets/$(TARGET)/files/* $(OPENWRT_DIR)/files/
+	
+	# Apply all patches
+	$(call PatchAll)
 
 	# Clean old images
 	$(call Clean,$(IMAGES))
@@ -307,8 +312,8 @@ $(OPENWRT_DIR)/feeds.conf: config.mk
 	#      (regardless of @ in URL). As a workaround we do a "feeds clean".
 	$(OPENWRT_DIR)/scripts/feeds clean
 
-	echo "src-svn luci $(LUCI_URL)" > $@
-	echo "src-svn packages $(PACKAGES_URL)" >> $@
+	#echo "src-svn luci $(LUCI_URL)" > $@
+	#echo "src-svn packages $(PACKAGES_URL)" >> $@
 	$(OPENWRT_DIR)/scripts/feeds update
 	$(OPENWRT_DIR)/scripts/feeds uninstall -a
 	$(OPENWRT_DIR)/scripts/feeds install $(CONFIG_LUCI_LIST)
