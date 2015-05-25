@@ -1,0 +1,13 @@
+--- a/configure.in
++++ b/configure.in
+@@ -51,9 +51,9 @@ AC_ARG_WITH(vsnprintf, [AS_HELP_STRING([--with-vsnprintf], [use vsnprintf emulation functions, default=auto])],
+	use_vsnprintf="$withval",
+	use_vsnprintf="no")
+ 
+ dnl Get the operating system and version number...
+-uname=`uname`
++uname=Linux
+ uversion=`uname -r | sed -e '1,$s/[[^0-9]]//g'`
+ if test x$uname = xIRIX64; then
+ 	uname="IRIX"
+patch -0

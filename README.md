@@ -78,6 +78,13 @@ headers. For example, on a Debian based system run the command:
                      gcc-multilib
 ```
 
+On Mac OS, instead:
+
+```
+  brew tap homebrew/dupes
+  brew install coreutils findutils gawk gnu-getopt gnu-tar grep wget md5sha1sum
+```
+
 Then:
 
 1. git clone https://github.com/carrierwrt/carrierwrt.git
